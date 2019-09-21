@@ -1,11 +1,18 @@
 
-!function(exports) {
-	var currentLang
+!function(exports, Object, Function) {
+	var currentLang, currentMap
 	, cache = {}
 	, formatRe = /\\{|{\\|'|{((?:("|')(?:\\?.)*?\2|[^;\}])+?)(?:;((.).*?))?}/g
+	, exprFound
+	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:false|in|null|true|typeof|void)\b|\.\w+\(|\w+:|\b([a-z_$](?:[\w$]|\.(?!\w+\()|\[\d+\])*)(?:\|\|(('|")(?:\\?.)*?\4|\d+))?/g
+	, pointerRe = /^([\w ]+)\.([\w ]+)$/
+	, fnClearRe = /''\+|\+''/g
 	, globalTexts = {}
 	, hasOwn = globalTexts.hasOwnProperty
+	// you can use Unicode's fraction slash (U+2044) with superscript and subscript numerals: e.g. ³⁄₄₇
+	// 2^53-1= 9007199254740991 == Number.MAX_SAFE_INTEGER
 	, list = i18n.list = []
+	, ext = i18n.ext = {}
 	, fnScope = {}
 
 	exports.i18n = i18n
@@ -13,17 +20,58 @@
 	i18n.get = get
 	i18n.use = use
 
+	function i18n(str, data) {
+		var out = typeof str === "number" ? "" + str :
+		cache[str] || (cache[str] = makeFn(getFn(str, currentMap) || str))
+		return typeof out === "string" ? out : out(data || {}, Item.get, i18n)
+	}
 
-	function i18n(str) {
+	function getFn(str, map, fallback) {
 		var tmp
-		, map = i18n[currentLang]
 		return typeof str === "string" ? (
-			map[str] || (tmp = str.split("."))[1] && (
-				typeof map[tmp[0]] === "object" &&
-				map[tmp[0]][tmp[1]] ||
-				map[tmp[1]]
-			) || str
-		) : ""
+			map[str] || (tmp = pointerRe.exec(str)) && (
+				typeof map[tmp[1]] === "object" &&
+				map[tmp[1]][tmp[2]] ||
+				map[tmp[2]] ||
+				fallback || tmp[2]
+			)
+		) :
+		Array.isArray(str) ?
+		getFn(str[0], map, getFn(str[1], map, getFn(str[2], map, fallback))) :
+		fallback
+	}
+
+
+	function makeFn(str) {
+		exprFound = 0
+		var fn = str.replace(formatRe, formatFn)
+		if (exprFound) try {
+			return Function("d,g,i", "return('" + fn.replace(fnClearRe, "") + "')")
+		} catch (e) {}
+		return str
+	}
+
+	function formatFn(_, expr, q, pattern, prefix) {
+		if (expr) {
+			exprFound = 1
+			var m
+			, lastIndex = 0
+			, rep = []
+
+			for (; m = exprRe.exec(expr); ) if (m[2]) {
+				rep.push(
+					expr.slice(lastIndex, lastIndex = m.index),
+					"g(d,'" + m[2] + "'," + (m[3] || "''") + ")"
+				)
+				lastIndex += m[0].length
+			}
+			expr = rep.join("") + expr.slice(lastIndex)
+
+			return pattern ?
+			"'+i." + ext[prefix] + "(" + expr + ",'" + pattern.replace(/'/g, "\\'") + "')+'" :
+			"'+(" + expr + ")+'"
+		}
+		return _ == "'" ?  "\\'" : "{"
 	}
 
 	function add(lang, texts) {
@@ -58,7 +106,8 @@
 	function use(lang) {
 		lang = get(lang)
 		if (lang && currentLang != lang) {
-			i18n[currentLang = i18n.current = lang] = i18n[currentLang] || {}
+			cache = {}
+			currentMap = i18n[currentLang = i18n.current = lang] = i18n[currentLang] || {}
 		}
 		return currentLang
 	}
@@ -158,6 +207,6 @@
 	/**/
 
 
-}(this)
+}(this, Object, Function)
 
 

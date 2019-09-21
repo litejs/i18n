@@ -4,6 +4,11 @@ require("..")
 	var mod = require("../../lib/i18n.js")
 	, i18n = mod.i18n
 
+	global.Fn = require("../../lib/fn").Fn
+	global.Event = require("../../lib/events")
+	global.Item = require("../../model").Item
+
+
 	i18n.def({
 		"et": "Eesti keeles",
 		"ar": "Arabic",
@@ -13,8 +18,9 @@ require("..")
 
 	i18n.add("et", {
 		ordinal: '"."',
-		Home: "Kodu",
+		Home: "Ko'du",
 		Name: "Nimi",
+		replace: "{pre}Ni'mi {name}, {deep.map.toUpperCase() + xx} vanus {age;#1}{unit} {3+1}",
 		button: {
 			Name: "Nupu nimi",
 			save: "Salvesta"
@@ -34,13 +40,15 @@ require("..")
 		num: "#'###,01"
 	})
 
-
 	assert.equal(i18n.current, "et")
 	assert.equal(i18n("Name"), "Nimi")
-	assert.equal(i18n("b.Name"), "Nimi")
 	assert.equal(i18n("a.Name"), "Nimi A")
+	assert.equal(i18n("b.Name"), "Nimi")
+	assert.equal(i18n("b.Age"), "Age")
+	assert.equal(i18n(["b.Name","a.Name"]), "Age")
 	assert.equal(i18n("button.Name"), "Nupu nimi")
-	assert.equal(i18n("button.Home"), "Kodu")
+	assert.equal(i18n("button.Home"), "Ko'du")
+	assert.equal(i18n("replace", {name:"Foo", age:10.1, deep:{map:"bar"}}), "Ni'mi Foo, BAR vanus 10 4")
 
 	// i18n.detect
 	mock.replace(Intl, "DateTimeFormat", null)
@@ -60,6 +68,7 @@ require("..")
 	.equal(i18n.number(null, "#.05"), "")
 	.equal(i18n.number(null, "#.05;-"), "-")
 	.equal(i18n.number(.34, "#,###.05"), ".35")
+	.equal(i18n("{.34;#,###.05}"), ".35")
 	.equal(i18n.number(-.34, "#,###.05 ;;;(#)"), "(.35)")
 	.equal(i18n.number(-.34, "#,###.05 ;;;#-"), ".35-")
 	.equal(i18n.number(.34, "#,###.05 ;;;(#)"), ".35 ")
@@ -96,7 +105,7 @@ require("..")
 	.equal(i18n.number(1.8,  "#/5"), "1⅘")
 
 	.equal(i18n.number(1235, "#,###,##,##2.00"), "1,236.00")
-	.equal(i18n.number(1235, "00,005.00"), "01,235.00")
+	.equal(i18n.number(1235.123, "00,005.00"), "01,235.00")
 	//assert.equal(i18n.number(1235, "#.1{1000k1000M1000G}"), "1.2k")
 	.equal(i18n.number(123, "#.1s"), "123.0")
 	.equal(i18n.number(1235, "#.1s"), "1.2k")
