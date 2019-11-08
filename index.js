@@ -23,13 +23,13 @@
 	function i18n(str, data) {
 		var out = typeof str === "number" ? "" + str :
 		cache[str] || (cache[str] = makeFn(getFn(str, currentMap) || str))
-		return typeof out === "string" ? out : out(data || {}, Item.get, i18n)
+		return isString(out) ? out : out(data || {}, Item.get, i18n)
 	}
 
 	function getFn(str, map, fallback) {
 		var tmp
-		return typeof str === "string" ? (
-			map[str] || (tmp = pointerRe.exec(str)) && (
+		return isString(str) ? (
+			isString(map[str]) ? map[str] : (tmp = pointerRe.exec(str)) && (
 				typeof map[tmp[1]] === "object" &&
 				map[tmp[1]][tmp[2]] ||
 				map[tmp[2]] ||
@@ -110,6 +110,10 @@
 			currentMap = i18n[currentLang = i18n.current = lang] = i18n[currentLang] || {}
 		}
 		return currentLang
+	}
+
+	function isString(str) {
+		return typeof str === "string"
 	}
 
 	/*** i18n.detect ***/
