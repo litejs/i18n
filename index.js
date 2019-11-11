@@ -118,15 +118,10 @@
 
 	/*** i18n.detect ***/
 	i18n.detect = function(fallback) {
-		var locale
-		, navigator = exports.navigator || exports
-		try {
-			// { locale: "et", timeZone: "Europe/Tallinn" }
-			locale = Intl.DateTimeFormat().resolvedOptions().locale
-		} catch(e) {}
+		var navigator = exports.navigator || exports
 
 		// navigator.userLanguage for IE, navigator.language for others
-		return use([locale, navigator.language, navigator.userLanguage].concat(
+		return use([navigator.language, navigator.userLanguage].concat(
 			navigator.languages, fallback, list[0]
 		).filter(get)[0])
 	}
