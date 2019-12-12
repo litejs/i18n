@@ -2,7 +2,7 @@
 !function(exports, Object, Function) {
 	var currentLang, currentMap
 	, cache = {}
-	, formatRe = /\\{|{\\|'|{((?:("|')(?:\\?.)*?\2|[^;\}])+?)(?:;((.).*?))?}/g
+	, formatRe = /\\{|{\\|'|{((?:("|')(?:\\?.)*?\2|[^;\}])+?)(?:;(.*?))?}/g
 	, exprFound
 	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:false|in|null|true|typeof|void)\b|\.\w+\s*\(|\w+\s*:|\b([a-z_$](?:[\w$]|\.(?!\w+\s*\()|\[\d+\])*)(?:\|\|(('|")(?:\\?.)*?\4|\d+))?/g
 	, pointerRe = /^([\w ]+)\.([\w ]+)$/
@@ -32,8 +32,8 @@
 				typeof map[tmp[1]] === "object" &&
 				map[tmp[1]][tmp[2]] ||
 				map[tmp[2]] ||
-				fallback || tmp[2]
-			)
+				tmp[2]
+			) || fallback
 		) :
 		Array.isArray(str) ?
 		getFn(str[0], map, getFn(str[1], map, getFn(str[2], map, fallback))) :
@@ -55,7 +55,7 @@
 		return str
 	}
 
-	function formatFn(_, expr, q, pattern, prefix) {
+	function formatFn(_, expr, q, pattern) {
 		if (expr) {
 			exprFound = 1
 			var m
@@ -70,9 +70,10 @@
 				lastIndex += m[0].length
 			}
 			expr = rep.join("") + expr.slice(lastIndex)
+			pattern = getFn(pattern, currentMap, pattern)
 
 			return pattern ?
-			"'+i." + ext[prefix] + "(" + expr + ",'" + pattern.replace(/'/g, "\\'") + "')+'" :
+			"'+i." + ext[pattern.charAt(0)] + "(" + expr + ",'" + pattern.replace(/'/g, "\\'") + "')+'" :
 			"'+(" + expr + ")+'"
 		}
 		return _ == "'" ?  "\\'" : "{"

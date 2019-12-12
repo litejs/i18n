@@ -17,6 +17,10 @@ require("..")
 	})
 
 	i18n.add("et", {
+		_: {
+			num: "#1;-",
+			num1: "#0,1;-"
+		},
 		ordinal: '"."',
 		Home: "Ko'du",
 		Name: "Nimi",
@@ -50,6 +54,7 @@ require("..")
 	assert.equal(i18n("button.Name"), "Nupu nimi")
 	assert.equal(i18n("button.Home"), "Ko'du")
 	assert.equal(i18n("replace", {name:"Foo", age:10.1, deep:{map:"bar"}}), "Ni'mi Foo, BAR vanus 10 4")
+	assert.equal(i18n("{val;_.num}C {val;_.num1}K", {val:12.3}), "12C 12,3K")
 
 	// i18n.detect
 	mock.replace(Intl, "DateTimeFormat", null)
