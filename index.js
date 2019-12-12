@@ -6,7 +6,6 @@
 	, exprFound
 	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:false|in|null|true|typeof|void)\b|\.\w+\s*\(|\w+\s*:|\b([a-z_$](?:[\w$]|\.(?!\w+\s*\()|\[\d+\])*)(?:\|\|(('|")(?:\\?.)*?\4|\d+))?/g
 	, pointerRe = /^([\w ]+)\.([\w ]+)$/
-	, fnClearRe = /''\+|\+''/g
 	, globalTexts = {}
 	, hasOwn = globalTexts.hasOwnProperty
 	// you can use Unicode's fraction slash (U+2044) with superscript and subscript numerals: e.g. ³⁄₄₇
@@ -46,8 +45,13 @@
 		exprFound = 0
 		var fn = str.replace(formatRe, formatFn)
 		if (exprFound) try {
-			return Function("d,g,i", "return('" + fn.replace(fnClearRe, "") + "')")
-		} catch (e) {}
+			return Function("d,g,i", "return('" + fn + "')")
+		} catch (e) {
+			/*** debug ***/
+			console.log("makeFn", fn)
+			console.log(e)
+			/**/
+		}
 		return str
 	}
 
