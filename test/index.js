@@ -115,6 +115,7 @@ require("..")
 	//assert.equal(i18n.number(1235, "#.1{1000k1000M1000G}"), "1.2k")
 	.equal(i18n.number(123, "#.1s"), "123.0")
 	.equal(i18n.number(1235, "#.1s"), "1.2k")
+	.equal(i18n.number(1235, "#.1 s"), "1.2 k")
 	.equal(i18n.number(1235000, "#.1s"), "1.2M")
 
 

@@ -142,14 +142,17 @@
 		)))(input, fnScope)
 	}
 	number.pre = {
-		s: "(o=d>1e9?(d/=1e9,'G'):d>1e6?(d/=1e6,'M'):d>1e3?(d/=1e3,'k'):''),"
+		s: "(o+=d>1e9?(d/=1e9,'G'):d>1e6?(d/=1e6,'M'):d>1e3?(d/=1e3,'k'):''),"
+	}
+	number.post = {
+		s: "+o"
 	}
 
 	function numStr(format) {
 		// totalLength
 		// format;0-value;NaN-value;roundPoint;negFormat
 		var conf = format.split(";")
-		, m2 = /(.*?)([\d# .,_·']*[\d\/]+)([os]?)(.*)/.exec(conf[0])
+		, m2 = /(.*?)([\d# .,_·']*[\d\/]+)(?:(\s*)([a-z])(\d*))?(.*)/.exec(conf[0])
 		, m3 = /([.,\/])(\d+)(?![\d.,])/.exec(m2[2])
 		, decimals = m3 && m3[2].length || 0
 		, full = m3 ? m2[2].slice(0, m3.index) : m2[2]
@@ -157,7 +160,7 @@
 		, sLen = num.length
 		, step = decimals ? +(m3[1] === "/" ? 1 / m3[2] : num + "." + m3[2]) : num
 		, decSep = m3 && m3[1]
-		, fn = "d<0&&(d=-d,n=1)||d>0||d===0?(" + (number.pre[m2[3]] || "") + "s=" + (
+		, fn = "d<0&&(d=-d,n=1)||d>0||d===0?(o='" + m2[3] + "'," + (number.pre[m2[4]] || "") + "s=" + (
 			// Use exponential notation to fix float rounding
 			// Math.round(1.005*100)/100 = 1 instead of 1.01
 			decimals ?
@@ -182,7 +185,7 @@
 				fn += ",i<1&&i!==0&&(r=r.slice(1))"
 			}
 		} else {
-			fn += ",r=(''+i)"
+			fn += ",r=''+i"
 		}
 		if (sLen > 1) {
 			if (decimals) sLen += decimals + 1
@@ -200,10 +203,10 @@
 			",n?'" + (conf[3] || "-#").replace("#", "'+r+'") + "':" +
 			(m2[1] ? "'" + m2[1]+ "'+r" : "r") +
 			// ordinal 1st
-			(m2[3] == "o" ? "+(n=d,o=g.o," +
+			(m2[4] == "o" ? "+(n=d,o=g.o," +
 				(fnScope.o = getFn("ordinal", currentMap).split(";")).pop() + ")" : "") +
-			(m2[3] == "s" ? "+o" : "" ) +
-			(m2[4] ? "+'" + m2[4]+ "'" : "")
+			(number.post[m2[4]] || "") +
+			(m2[6] ? "+'" + m2[6] + "'" : "")
 		)
 
 		return fn + "):'" + (conf[1] || "") + "'"
