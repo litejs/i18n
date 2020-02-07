@@ -150,7 +150,7 @@
 
 	function numStr(format) {
 		// totalLength
-		// format;0-value;NaN-value;roundPoint;negFormat
+		// format;0-value?;NaN-value;roundPoint;negFormat
 		var conf = format.split(";")
 		, m2 = /([^\d#]*)([\d# .,_·']*\/?\d+)(?:(\s*)([a-z])(\d*))?(.*)/.exec(conf[0])
 		, m3 = /([.,\/])(\d+)(?![\d.,])/.exec(m2[2])
@@ -166,8 +166,8 @@
 			decimals ?
 			"(d+'e" + decimals + "')/" + (step + "e" + decimals) :
 			"d/" + num
-		) + ",i=~~(" + (
-			conf[2] == 1 ? "s===~~s?s:s+1" : "s+" + (conf[2] || .5)
+		) + ",i=Math.floor(" + (
+			conf[2] == 1 ? "s%1?s+1:s" : "s+" + (conf[2] || .5)
 		) + ")*" + step
 
 		if (decimals) {
@@ -215,7 +215,7 @@
 		return "(i<1e" + len + "?r" + (
 			lastLen ? ".slice(0,-" + (lastLen + dec) + "):" : ":"
 		) + (
-			len < 15 ? numJunk(arr, i?i-1:i, len, dec) : "r.slice(0,-" + (lastLen + dec) + ")"
+			len < 16 ? numJunk(arr, i?i-1:i, len, dec) : "r.slice(0,-" + (lastLen + dec) + ")"
 		) + "+'" + arr[i].charAt(0).replace("'", "\\'") + "'+r.slice(-" + (len + dec) + (
 			lastLen ? ",-" + (lastLen + dec) : "") + ")"
 		+ ")"
