@@ -192,10 +192,8 @@
 			fn += ",r=(r.length<" + sLen + "?(g.p+r).slice(-" + sLen + "):r)"
 		}
 
-		if (num = full.match(/[ ,.'][\d#]+/g)) {
-			fn += ".replace(/\\d(?=" + (
-				"(((((".slice(-num.length) + num.join(")?").replace(/[ ,.]/g,"").replace(/[\d#]/g, "\\d") + ")+"
-			) + (decimals ? "\\" + decSep : "$") + ")/g,'$&" + num[0].charAt(0) + "')"
+		if (num = full.match(/[^\d#][\d#]+/g)) {
+			fn += ",r=" + numJunk(num, num.length - 1, 0, decimals ? decimals + 1 : 0)
 		}
 
 		fn += (
@@ -210,6 +208,17 @@
 		)
 
 		return fn + "):'" + (conf[1] || "") + "'"
+	}
+	function numJunk(arr, i, lastLen, dec) {
+		var len = lastLen + arr[i].length - 1
+
+		return "(i<1e" + len + "?r" + (
+			lastLen ? ".slice(0,-" + (lastLen + dec) + "):" : ":"
+		) + (
+			len < 15 ? numJunk(arr, i?i-1:i, len, dec) : "r.slice(0,-" + (lastLen + dec) + ")"
+		) + "+'" + arr[i].charAt(0).replace("'", "\\'") + "'+r.slice(-" + (len + dec) + (
+			lastLen ? ",-" + (lastLen + dec) : "") + ")"
+		+ ")"
 	}
 	/**/
 
