@@ -152,7 +152,7 @@
 		// totalLength
 		// format;0-value;NaN-value;roundPoint;negFormat
 		var conf = format.split(";")
-		, m2 = /(.*?)([\d# .,_·']*[\d\/]+)(?:(\s*)([a-z])(\d*))?(.*)/.exec(conf[0])
+		, m2 = /([^\d#]*)([\d# .,_·']*\/?\d+)(?:(\s*)([a-z])(\d*))?(.*)/.exec(conf[0])
 		, m3 = /([.,\/])(\d+)(?![\d.,])/.exec(m2[2])
 		, decimals = m3 && m3[2].length || 0
 		, full = m3 ? m2[2].slice(0, m3.index) : m2[2]
