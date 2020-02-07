@@ -129,6 +129,10 @@ require("..")
 	.equal(i18n.number(1235, "#.1 s"), "1.2 k")
 	.equal(i18n.number(1235000, "#.1s"), "1.2M")
 
+	i18n.number.pre["%"] = "o+=(d*=100,'%'),"
+	// custom formats
+	assert.equal(i18n.number(0.3363, "0.01 %"), "33.63 %")
+
 
 	function assertOrdinal(i) {
 		assert.equal(i18n.number(parseInt(i), "1o"), i)

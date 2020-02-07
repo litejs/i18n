@@ -138,21 +138,20 @@
 	function number(input, format) {
 		return (cache[format] || (cache[format] = Function(
 			"d,g",
-			"var s,i,n,r,o;return " + numStr(format)
+			"var s,i,N,n,r,o;return " + numStr(format)
 		)))(input, fnScope)
 	}
 	number.pre = {
 		s: "(o+=d>1e9?(d/=1e9,'G'):d>1e6?(d/=1e6,'M'):d>1e3?(d/=1e3,'k'):''),"
 	}
 	number.post = {
-		s: "+o"
 	}
 
 	function numStr(format) {
 		// totalLength
 		// format;0-value?;NaN-value;roundPoint;negFormat
 		var conf = format.split(";")
-		, m2 = /([^\d#]*)([\d# .,_·']*\/?\d+)(?:(\s*)([a-z])(\d*))?(.*)/.exec(conf[0])
+		, m2 = /([^\d#]*)([\d# .,_·']*\/?\d+)(?:(\s*)([a-z%]+)(\d*))?(.*)/.exec(conf[0])
 		, m3 = /([.,\/])(\d+)(?![\d.,])/.exec(m2[2])
 		, decimals = m3 && m3[2].length || 0
 		, full = m3 ? m2[2].slice(0, m3.index) : m2[2]
@@ -160,7 +159,7 @@
 		, sLen = num.length
 		, step = decimals ? +(m3[1] === "/" ? 1 / m3[2] : num + "." + m3[2]) : num
 		, decSep = m3 && m3[1]
-		, fn = "d<0&&(d=-d,n=1)||d>0||d===0?(o='" + m2[3] + "'," + (number.pre[m2[4]] || "") + "s=" + (
+		, fn = "d<0&&(N=d=-d)||d>0||d===0?(o='" + m2[3] + "'," + (number.pre[m2[4]] || "") + "s=" + (
 			// Use exponential notation to fix float rounding
 			// Math.round(1.005*100)/100 = 1 instead of 1.01
 			decimals ?
@@ -196,19 +195,23 @@
 			fn += ",r=" + numJunk(num, num.length - 1, 0, decimals ? decimals + 1 : 0)
 		}
 
+		if (m2[4] == "o") {
+			number.post.o = "r+(n=d,o=g.o," + (
+				fnScope.o = getFn("ordinal", currentMap).split(";")
+			).pop() + ")"
+		}
+
 		fn += (
+			(m2[4] ? ",r=" + (number.post[m2[4]] || "r+o") : "") +
 			// negative format
-			",n?'" + (conf[3] || "-#").replace("#", "'+r+'") + "':" +
+			",N?'" + (conf[3] || "-#").replace("#", "'+r+'") + "':" +
 			(m2[1] ? "'" + m2[1]+ "'+r" : "r") +
-			// ordinal 1st
-			(m2[4] == "o" ? "+(n=d,o=g.o," +
-				(fnScope.o = getFn("ordinal", currentMap).split(";")).pop() + ")" : "") +
-			(number.post[m2[4]] || "") +
 			(m2[6] ? "+'" + m2[6] + "'" : "")
 		)
 
 		return fn + "):'" + (conf[1] || "") + "'"
 	}
+
 	function numJunk(arr, i, lastLen, dec) {
 		var len = lastLen + arr[i].length - 1
 
