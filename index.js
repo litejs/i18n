@@ -170,7 +170,10 @@
 		) + ")*" + step
 
 		if (decimals) {
-			fn += ",r=i.toFixed(" + decimals + ")"
+			fn += (m2[5] ?
+				",r=(''+(+i.toFixed(" + (m2[5] < 4 ? 2 : m2[5]-2) + "-(i<10?0:i<100?1:2)-o.length" + ")))" :
+				",r=i.toFixed(" + decimals + ")"
+			)
 			if (decSep == "/") {
 				fn += ".replace(/\\.\\d+/,'" + (
 					m3[2] == 5 ?
@@ -181,7 +184,7 @@
 				fn += ".replace('.','" + decSep + "')"
 			}
 			if (sLen === 0) {
-				fn += ",i<1&&i!==0&&(r=r.slice(1))"
+				fn += ",i<1&&(r=r.slice(1)||'0')"
 			}
 		} else {
 			fn += ",r=''+i"
