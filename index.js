@@ -142,7 +142,7 @@
 		)))(input, fnScope)
 	}
 	number.pre = {
-		s: "(o+=d>1e9?(d/=1e9,'G'):d>1e6?(d/=1e6,'M'):d>1e3?(d/=1e3,'k'):''),"
+		s: "(o+=d<1e3?'':d<1e6?(d/=1e3,'k'):d<1e9?(d/=1e6,'M'):(d/=1e9,'G')),"
 	}
 	number.post = {
 	}
@@ -165,8 +165,8 @@
 			decimals ?
 			"(d+'e" + decimals + "')/" + (step + "e" + decimals) :
 			"d/" + num
-		) + ",i=Math.floor(" + (
-			conf[2] == 1 ? "s%1?s+1:s" : "s+" + (conf[2] || .5)
+		) + ",i=Math.floor(s" + (
+			conf[2] == 1 ? "%1?s+1:s" : "+" + (conf[2] || .5)
 		) + ")*" + step
 
 		if (decimals) {
@@ -187,7 +187,7 @@
 				fn += ",i<1&&(r=r.slice(1)||'0')"
 			}
 		} else {
-			fn += ",r=''+i"
+			fn += ",r=i+''"
 		}
 		if (sLen > 1) {
 			if (decimals) sLen += decimals + 1
