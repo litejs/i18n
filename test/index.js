@@ -71,8 +71,14 @@ require("..").describe
 
 	// i18n.number
 	assert
+	.equal(i18n.number(0, "#.01"), ".00")
+	.equal(i18n.number(0, "#.01;-"), ".00")
+	.equal(i18n.number(NaN, "#.05"), "")
+	.equal(i18n.number(NaN, "#.05;-"), "-")
 	.equal(i18n.number(null, "#.05"), "")
 	.equal(i18n.number(null, "#.05;-"), "-")
+	.equal(i18n.number(void 0, "#.05"), "")
+	.equal(i18n.number(void 0, "#.05;-"), "-")
 	.equal(i18n.number(.34, "#,###.05"), ".35")
 	.equal(i18n("{.34;#,###.05}"), ".35")
 	.equal(i18n.number(1234.34,  "$ #,###.05 ;;;($#)"), "$ 1,234.35 ")
