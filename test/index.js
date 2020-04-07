@@ -1,5 +1,5 @@
 
-require("..")
+require("..").describe
 .test("lib/i18n", function(assert, mock) {
 	var mod = require("../../lib/i18n.js")
 	, i18n = mod.i18n
