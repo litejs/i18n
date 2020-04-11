@@ -2,10 +2,11 @@
 !function(exports, Object, Function) {
 	var currentLang, currentMap
 	, cache = {}
-	, formatRe = /\\{|{\\|'|{((?:("|')(?:\\?.)*?\2|[^;\}])+?)(?:;(.*?))?}/g
+	, formatRe = /\\{|{\\|'|{((?:("|')(?:\\?.)*?\2|[^;\}])+?)(?:;((?:(['"\/])(?:\\?.)*?\4[gim]*|[^}])*))?}/g
 	, exprFound
 	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:false|in|null|true|typeof|void)\b|\.\w+|\w+\s*:/g
 	, wordRe = /\b[a-z_$][\w$]*/ig
+	, pattRe = /(\w+)(?::((?:(['"\/])(?:\\?.)*?\3[gim]*|[^;])*))/g
 	, pointerRe = /^([\w ]+)\.([\w ]+)$/
 	, globalTexts = {}
 	, hasOwn = globalTexts.hasOwnProperty
@@ -60,16 +61,22 @@
 	function formatFn(_, expr, q, pattern) {
 		if (expr) {
 			if (!exprFound) exprFound = {}
-			var i
+			var i, tmp
 			, vars = expr.replace(exprRe, "").match(wordRe)
 
 			if (vars) for (i = vars.length; i--; ) exprFound[vars[i]] = vars[i] + "=g(d,'" + vars[i] + "','')"
 
-			pattern = getFn(pattern, currentMap, pattern)
+			if (pattern = getFn(pattern, currentMap, pattern)) {
+				if (i = ext[pattern.charAt(0)]) {
+					expr = "i." + i + "(" + expr + ",'" + pattern.replace(/'/g, "\\'") + "')"
+				} else {
+					for (; i = pattRe.exec(pattern); ) {
+						expr = "i." + i[1] + "(" + expr + "," + i[2] + ")"
+					}
+				}
+			}
 
-			return pattern ?
-			"'+i." + ext[pattern.charAt(0)] + "(" + expr + ",'" + pattern.replace(/'/g, "\\'") + "')+'" :
-			"'+(" + expr + ")+'"
+			return "'+(" + expr + ")+'"
 		}
 		return _ == "'" ?  "\\'" : "{"
 	}
@@ -222,6 +229,15 @@
 		+ ")"
 	}
 	/**/
+
+	i18n.map = function(input, str, sep, lastSep) {
+		if (!Array.isArray(input)) return input
+		var arr = input.map(function(data) {
+			return i18n(str, data)
+		})
+		, end = lastSep && arr.length > 1 ? lastSep + arr.pop() : ""
+		return arr.join(sep || ", ") + end
+	}
 
 
 }(this, Object, Function)
