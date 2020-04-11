@@ -4,7 +4,8 @@
 	, cache = {}
 	, formatRe = /\\{|{\\|'|{((?:("|')(?:\\?.)*?\2|[^;\}])+?)(?:;(.*?))?}/g
 	, exprFound
-	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:false|in|null|true|typeof|void)\b|\.\w+\s*\(|\w+\s*:|\b([a-z_$](?:[\w$]|\.(?!\w+\s*\()|\[\d+\])*)(?:\|\|(('|")(?:\\?.)*?\4|\d+))?/g
+	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:false|in|null|true|typeof|void)\b|\.\w+|\w+\s*:/g
+	, wordRe = /\b[a-z_$][\w$]*/ig
 	, pointerRe = /^([\w ]+)\.([\w ]+)$/
 	, globalTexts = {}
 	, hasOwn = globalTexts.hasOwnProperty
@@ -45,7 +46,8 @@
 		exprFound = 0
 		var fn = str.replace(formatRe, formatFn)
 		if (exprFound) try {
-			return Function("d,g,i", "return('" + fn + "')")
+			var keys = Object.values(exprFound)
+			return Function("d,g,i", (keys[0] ? "var " + keys + ";": "") + "return('" + fn + "')")
 		} catch (e) {
 			/*** debug ***/
 			console.log("makeFn", fn)
@@ -57,19 +59,12 @@
 
 	function formatFn(_, expr, q, pattern) {
 		if (expr) {
-			exprFound = 1
-			var m
-			, lastIndex = 0
-			, rep = []
+			if (!exprFound) exprFound = {}
+			var i
+			, vars = expr.replace(exprRe, "").match(wordRe)
 
-			for (; m = exprRe.exec(expr); ) if (m[2]) {
-				rep.push(
-					expr.slice(lastIndex, lastIndex = m.index),
-					"g(d,'" + m[2] + "'," + (m[3] || "''") + ")"
-				)
-				lastIndex += m[0].length
-			}
-			expr = rep.join("") + expr.slice(lastIndex)
+			if (vars) for (i = vars.length; i--; ) exprFound[vars[i]] = vars[i] + "=g(d,'" + vars[i] + "','')"
+
 			pattern = getFn(pattern, currentMap, pattern)
 
 			return pattern ?
