@@ -24,7 +24,7 @@ require("..").describe
 		ordinal: '"."',
 		Home: "Ko'du",
 		Name: "Nimi",
-		replace: "{pre}Ni'mi {name}, {deep.map.toUpperCase() + xx} vanus {age;#1}{unit} {3+1}",
+		replace: "{pre}Ni'mi {name;upcase}, {deep.map.toUpperCase() + xx} vanus {age;#1}{unit} {3+1}",
 		list: "{arr;map:'{name};{val}'}",
 		button: {
 			Name: "Nupu nimi",
@@ -54,7 +54,7 @@ require("..").describe
 	assert.equal(i18n("button"), "button")
 	assert.equal(i18n("button.Name"), "Nupu nimi")
 	assert.equal(i18n("button.Home"), "Ko'du")
-	assert.equal(i18n("replace", {name:"Foo", age:10.1, deep:{map:"bar"}}), "Ni'mi Foo, BAR vanus 10 4")
+	assert.equal(i18n("replace", {name:"Foo", age:10.1, deep:{map:"bar"}}), "Ni'mi FOO, BAR vanus 10 4")
 	assert.equal(i18n("list", {arr: [{name:"a",val:1},{name:"b",val:2}]}), "a;1, b;2")
 	assert.equal(i18n("{val;_.num}C {val;_.num1}K", {val:12.3}), "12C 12,3K")
 

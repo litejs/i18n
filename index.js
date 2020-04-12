@@ -6,7 +6,7 @@
 	, exprFound
 	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:false|in|null|true|typeof|void)\b|\.\w+|\w+\s*:/g
 	, wordRe = /\b[a-z_$][\w$]*/ig
-	, pattRe = /(\w+)(?::((?:(['"\/])(?:\\?.)*?\3[gim]*|[^;])*))/g
+	, pattRe = /(\w+)(?::((?:(['"\/])(?:\\?.)*?\3[gim]*|[^;])*))?/g
 	, pointerRe = /^([\w ]+)\.([\w ]+)$/
 	, globalTexts = {}
 	, hasOwn = globalTexts.hasOwnProperty
@@ -22,9 +22,11 @@
 	i18n.use = use
 
 	function i18n(str, data) {
-		var out = typeof str === "number" ? "" + str :
-		cache[str] || (cache[str] = makeFn(getFn(str, currentMap) || str))
-		return isString(out) ? out : out(data || {}, Item.get, i18n)
+		if (typeof str === "number") return "" + str
+		var out = cache[str] || (
+			cache[str] = makeFn(getFn(str, currentMap) || str)
+		)
+		return isString(out) ? out : out(data || {}, i18n)
 	}
 
 	function getFn(str, map, fallback) {
@@ -48,7 +50,7 @@
 		var fn = str.replace(formatRe, formatFn)
 		if (exprFound) try {
 			var keys = Object.values(exprFound)
-			return Function("d,g,i", (keys[0] ? "var " + keys + ";": "") + "return('" + fn + "')")
+			return Function("d,i", (keys[0] ? "var " + keys + ";": "") + "return('" + fn + "')")
 		} catch (e) {
 			/*** debug ***/
 			console.log("makeFn", fn)
@@ -64,7 +66,7 @@
 			var i, tmp
 			, vars = expr.replace(exprRe, "").match(wordRe)
 
-			if (vars) for (i = vars.length; i--; ) exprFound[vars[i]] = vars[i] + "=g(d,'" + vars[i] + "','')"
+			if (vars) for (i = vars.length; i--; ) exprFound[vars[i]] = vars[i] + "=d['" + vars[i] + "']!=null?d['" + vars[i] + "']:''"
 
 			if (pattern = getFn(pattern, currentMap, pattern)) {
 				if (i = ext[pattern.charAt(0)]) {
@@ -193,7 +195,7 @@
 		}
 		if (sLen > 1) {
 			if (decimals) sLen += decimals + 1
-			fn += ",r=(r.length<" + sLen + "?(g.p+r).slice(-" + sLen + "):r)"
+			fn += ",r=(r.length<" + sLen + "?('0000000000000000'+r).slice(-" + sLen + "):r)"
 		}
 
 		if (num = full.match(/[^\d#][\d#]+/g)) {
@@ -237,6 +239,12 @@
 		})
 		, end = lastSep && arr.length > 1 ? lastSep + arr.pop() : ""
 		return arr.join(sep || ", ") + end
+	}
+	i18n.upcase = function(str) {
+		return isString(str) ? str.toUpperCase() : ""
+	}
+	i18n.locase = function(str) {
+		return isString(str) ? str.toLownerCase() : ""
 	}
 
 
