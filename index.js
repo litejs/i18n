@@ -2,7 +2,7 @@
 !function(exports, Object, Function) {
 	var currentLang, currentMap
 	, cache = {}
-	, formatRe = /\\{|{\\|'|{((?:("|')(?:\\?.)*?\2|[^;\}])+?)(?:;((?:(['"\/])(?:\\?.)*?\4[gim]*|[^}])*))?}/g
+	, formatRe = /\\{|{\\|'|\n|{((?:("|')(?:\\?.)*?\2|[^;\}])+?)(?:;((?:(['"\/])(?:\\?.)*?\4[gim]*|[^}])*))?}/g
 	, exprFound
 	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:false|in|null|true|typeof|void)\b|\.\w+|\w+\s*:/g
 	, wordRe = /\b[a-z_$][\w$]*/ig
@@ -80,7 +80,7 @@
 
 			return "'+(" + expr + ")+'"
 		}
-		return _ == "'" ?  "\\'" : "{"
+		return _ == "'" ?  "\\'" : _ == "\n" ? "\\n" : "{"
 	}
 
 	function add(lang, texts) {
