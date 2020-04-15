@@ -1,13 +1,9 @@
 
-require("..").describe
+require("litejs/test")
+.describe("i18n")
 .test("lib/i18n", function(assert, mock) {
-	var mod = require("../../lib/i18n.js")
+	var mod = require("../index.js")
 	, i18n = mod.i18n
-
-	global.Fn = require("../../lib/fn").Fn
-	global.Event = require("../../lib/events")
-	global.Item = require("../../model").Item
-
 
 	i18n.def({
 		"et": "Eesti keeles",
