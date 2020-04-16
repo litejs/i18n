@@ -1,6 +1,6 @@
 {
   "name": "@litejs/i18n",
-  "version": "20.0.0-rc.1",
+  "version": "20.0.0-rc.3",
   "license": "MIT",
   "author": "Lauri Rooden <lauri@rooden.ee>",
   "description": "Simple i18n",
@@ -13,6 +13,9 @@
   "files": [
     "index.js"
   ],
+  "scripts": {
+    "test": "nyc -r text -r html -c false lj t"
+  },
   "repository": "git://github.com/litejs/i18n.git",
   "bugs": {
     "url": "https://github.com/litejs/i18n/issues"
