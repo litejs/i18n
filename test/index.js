@@ -42,8 +42,8 @@ describe("i18n", function() {
 	it("should get translation by key")
 
 	it("should format", function(assert, mock) {
-		var mod = require("../index.js")
-		, i18n = mod.i18n
+
+		i18n.vals.abc = "A B"
 
 		i18n.add("et", {
 			_: {
@@ -97,6 +97,16 @@ describe("i18n", function() {
 		assert.equal(i18n("{up;locase}", { up: "UPCASE" }), "upcase")
 		assert.equal(i18n("{up;locase}", { up: 20 }), "20")
 		assert.equal(i18n("{up;locase}", { up: void 0 }), "")
+		assert.equal(i18n("{arr[0]}", { arr: ["A"] }), "A")
+		assert.equal(i18n("{arr[0].x}", { arr: [{x:"B"}] }), "B")
+		assert.equal(i18n("{arr[0].toLocaleString()}", { arr: ["C"] }), "C")
+		assert.equal(i18n("{arr[0].toLocaleString();locase}", { arr: ["C"] }), "c")
+		assert.equal(i18n("{abc}"), "A B")
+		assert.equal(i18n("{abc}", {}), "A B")
+		assert.equal(i18n("{abc}", {abc: "A C"}), "A C")
+		assert.equal(i18n("{$abc}"), "A B")
+		assert.equal(i18n("{$abc}", {}), "A B")
+		assert.equal(i18n("{$abc}", {abc: "A C"}), "A B")
 		assert.end()
 	})
 

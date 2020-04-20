@@ -1,14 +1,17 @@
 
 !function(exports, Object, Function) {
+	'use strict'
 	var currentLang, currentMap
+	, isArray = Array.isArray
 	, cache = {}
 	, formatRe = /\\{|{\\|'|\n|{((?:("|')(?:\\?.)*?\2|[^;\}])+?)(?:;((?:(['"\/])(?:\\?.)*?\4[gim]*|[^}])*))?}/g
 	, exprFound
-	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:$|false|in|null|true|typeof|void)\b|\.\w+|\w+\s*:/g
-	, wordRe = /\b[a-z_$][\w$]*/ig
+	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:\$|false|in|null|true|typeof|void)\b|\.\w+|\w+\s*:|\s+/g
+	, wordRe = /(\$?)([a-z_][\w$]*)/ig
 	, pattRe = /(\w+)(?::((?:(['"\/])(?:\\?.)*?\3[gim]*|[^;])*))?/g
 	, pointerRe = /^([\w ]+)\.([\w ]+)$/
 	, globalTexts = {}
+	, globalVals = i18n.vals = {}
 	// you can use Unicode's fraction slash (U+2044) with superscript and subscript numerals: e.g. ³⁄₄₇
 	// 2^53-1= 9007199254740991 == Number.MAX_SAFE_INTEGER
 	, list = i18n.list = []
@@ -25,7 +28,7 @@
 		var out = cache[str] || (
 			cache[str] = makeFn(getFn(str, currentMap) || str)
 		)
-		return isString(out) ? out : out(data || {}, i18n)
+		return isString(out) ? out : out(data || {}, i18n, globalVals)
 	}
 
 	function getFn(str, map, fallback) {
@@ -38,7 +41,7 @@
 				tmp[2]
 			) || fallback
 		) :
-		Array.isArray(str) ?
+		isArray(str) ?
 		getFn(str[0], map, getFn(str[1], map, getFn(str[2], map, fallback))) :
 		fallback
 	}
@@ -49,7 +52,7 @@
 		var fn = str.replace(formatRe, formatFn)
 		if (exprFound) try {
 			var keys = Object.values(exprFound)
-			return Function("$,i", (keys[0] ? "var " + keys + ";": "") + "return('" + fn + "')")
+			return Function("$,$i,$g", (keys[0] ? "var " + keys + ";": "") + "return('" + fn + "')")
 		} catch (e) {
 			/*** debug
 			console.log("makeFn", fn)
@@ -62,17 +65,21 @@
 	function formatFn(_, expr, q, pattern) {
 		if (expr) {
 			if (!exprFound) exprFound = {}
-			var i, tmp
-			, vars = expr.replace(exprRe, "").match(wordRe)
+			var tmp
+			, vars = expr.replace(exprRe, "")
 
-			if (vars) for (i = vars.length; i--; ) exprFound[vars[i]] = vars[i] + "=$['" + vars[i] + "']!=null?$['" + vars[i] + "']:''"
+			for (; tmp = wordRe.exec(vars); ) {
+				exprFound[tmp[0]] = tmp[0] + (
+					tmp[1] ? "=" : "=$['" + tmp[0] + "']!=null?$['" + tmp[0] + "']:"
+				) + "$g['" + tmp[2] + "']!=null?$g['" + tmp[2] + "']:''"
+			}
 
 			if (pattern = getFn(pattern, currentMap, pattern)) {
-				if (i = ext[pattern.charAt(0)]) {
-					expr = "i." + i + "(" + expr + ",'" + pattern.replace(/'/g, "\\'") + "')"
+				if (tmp = ext[pattern.charAt(0)]) {
+					expr = "$i." + tmp + "(" + expr + ",'" + pattern.replace(/'/g, "\\'") + "')"
 				} else {
-					for (; i = pattRe.exec(pattern); ) {
-						expr = "i." + i[1] + "(" + expr + "," + i[2] + ")"
+					for (; tmp = pattRe.exec(pattern); ) {
+						expr = "$i." + tmp[1] + "(" + expr + "," + tmp[2] + ")"
 					}
 				}
 			}
@@ -231,7 +238,7 @@
 	/**/
 
 	i18n.map = function(input, str, sep, lastSep) {
-		if (!Array.isArray(input)) return input
+		if (!isArray(input)) return input
 		var arr = input.map(function(data) {
 			return i18n(str, data)
 		})

@@ -9,7 +9,6 @@
     "litejs"
   ],
   "main": "index.js",
-  "readmeFilename": "README.md",
   "files": [
     "index.js"
   ],
