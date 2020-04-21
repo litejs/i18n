@@ -34,7 +34,9 @@
 	function getFn(str, map, fallback) {
 		var tmp
 		return isString(str) ? (
-			isString(map[str]) ? map[str] : (tmp = pointerRe.exec(str)) && (
+			isString(map[str]) ? map[str] :
+			typeof map[str] === "object" ? map[str][""] :
+			(tmp = pointerRe.exec(str)) && (
 				typeof map[tmp[1]] === "object" &&
 				map[tmp[1]][tmp[2]] ||
 				map[tmp[2]] ||

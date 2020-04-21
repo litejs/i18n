@@ -15,10 +15,36 @@ describe("i18n", function() {
 			"en": "In English",
 			"fr-CH": "French (Switzerland)"
 		})
-		assert.equal(i18n.current, "et")
-		assert.equal(i18n.list, ["et", "ar", "en", "fr-CH"])
 
-		assert.end()
+		assert.equal(i18n.current, "et")
+		.equal(i18n.list, ["et", "ar", "en", "fr-CH"])
+		.end()
+	})
+
+	it("should get translation by key", function(assert) {
+		i18n.use("en")
+		i18n.add("en", {
+			page: {
+				title: "Title"
+			},
+			save: "Save",
+			user: {
+				"": "User",
+				"*": "1 user;# users",
+				"save": "Save User"
+			}
+		})
+
+		assert
+		.equal(i18n("page"), "page")
+		.equal(i18n("page.save"), "Save")
+		.equal(i18n("page.title"), "Title")
+		.equal(i18n("save"), "Save")
+		.equal(i18n("unknown.save"), "Save")
+		.equal(i18n("user"), "User")
+		.equal(i18n("user.save"), "Save User")
+		.equal(i18n("user.name"), "name")
+		.end()
 	})
 
 	it("should detect language", function(assert, mock) {
@@ -38,8 +64,6 @@ describe("i18n", function() {
 		assert.equal(i18n.detect("eq"), "et")
 		assert.end()
 	})
-
-	it("should get translation by key")
 
 	it("should format", function(assert, mock) {
 
