@@ -145,6 +145,9 @@
 	/**/
 
 	/*** i18n.number ***/
+	var numRe1 = /([^\d#]*)([\d# .,_·']*\/?\d+)(?:(\s*)([a-z%]+)(\d*))?(.*)/
+	, numRe2 = /([.,\/])(\d+)(?![\d.,])/
+
 	i18n[ext["#"] = "number"] = number
 	function number(input, format) {
 		return (cache[format] || (cache[format] = Function(
@@ -162,8 +165,8 @@
 		// totalLength
 		// format;0-value?;NaN-value;roundPoint;negFormat
 		var conf = format.split(";")
-		, m2 = /([^\d#]*)([\d# .,_·']*\/?\d+)(?:(\s*)([a-z%]+)(\d*))?(.*)/.exec(conf[0])
-		, m3 = /([.,\/])(\d+)(?![\d.,])/.exec(m2[2])
+		, m2 = numRe1.exec(conf[0])
+		, m3 = numRe2.exec(m2[2])
 		, decimals = m3 && m3[2].length || 0
 		, full = m3 ? m2[2].slice(0, m3.index) : m2[2]
 		, num = full.replace(/\D+/g, "")
@@ -238,6 +241,26 @@
 		+ ")"
 	}
 	/**/
+
+	/*
+	S.pick = N.pick = function() {
+		var val = this + "="
+		for (var s, a = arguments, i = 0, len = a.length; i < len;) {
+			s = a[i++]
+			if (s.indexOf(val) == 0) {
+				s = s.slice(val.length)
+				i = len
+			}
+		}
+		return s.replace("#", this)
+	}
+
+	S.plural = N.plural = function() {
+		// Plural-Forms: nplurals=2; plural=n != 1;
+		// http://www.gnu.org/software/gettext/manual/html_mono/gettext.html#Plural-forms
+		return arguments[ +Fn("n->" + (String.plural || "n!=1"))( parseFloat(this) ) ].replace("#", this)
+	}
+	*/
 
 	i18n.map = function(input, str, sep, lastSep) {
 		if (!isArray(input)) return input
