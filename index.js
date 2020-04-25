@@ -39,8 +39,7 @@
 			(tmp = pointerRe.exec(str)) && (
 				typeof map[tmp[1]] === "object" &&
 				map[tmp[1]][tmp[2]] ||
-				map[tmp[2]] ||
-				tmp[2]
+				map[tmp[2]]
 			) || fallback
 		) :
 		isArray(str) ?

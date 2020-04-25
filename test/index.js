@@ -41,9 +41,9 @@ describe("i18n", function() {
 		.equal(i18n("page.title"), "Title")
 		.equal(i18n("save"), "Save")
 		.equal(i18n("unknown.save"), "Save")
+		.equal(i18n("unknown.txt"), "unknown.txt")
 		.equal(i18n("user"), "User")
 		.equal(i18n("user.save"), "Save User")
-		.equal(i18n("user.name"), "name")
 		.end()
 	})
 
@@ -105,7 +105,6 @@ describe("i18n", function() {
 		assert.equal(i18n("\\{name}"), "{name}")
 		assert.equal(i18n("a.Name"), "Nimi A")
 		assert.equal(i18n("b.Name"), "Nimi")
-		assert.equal(i18n("b.Age"), "Age")
 		assert.equal(i18n(["b.Name","a.Name"]), "Nimi")
 		assert.equal(i18n("button"), "button")
 		assert.equal(i18n("button.Name"), "Nupu nimi")
