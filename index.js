@@ -4,7 +4,7 @@
 	var currentLang, currentMap
 	, isArray = Array.isArray
 	, cache = {}
-	, formatRe = /\\{|{\\|'|\n|{((?:("|')(?:\\?.)*?\2|[^;\}])+?)(?:;((?:(['"\/])(?:\\?.)*?\4[gim]*|[^}])*))?}/g
+	, formatRe = /\\{|{\\|'|\n|{({[\s\S]*}|\[[\s\S]*]|(?:("|')(?:\\?.)*?\2|[^;{}])+?)(?:;((?:(['"\/])(?:\\?.)*?\4[gim]*|[^}])*))?}/g
 	, exprFound
 	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:\$|false|in|null|true|typeof|void)\b|\.\w+|\w+\s*:|\s+/g
 	, wordRe = /(\$?)([a-z_][\w$]*)/ig
@@ -81,7 +81,7 @@
 					expr = "$i." + tmp + "(" + expr + ",'" + pattern.replace(/'/g, "\\'") + "')"
 				} else {
 					for (; tmp = pattRe.exec(pattern); ) {
-						expr = "$i." + tmp[1] + "(" + expr + "," + tmp[2] + ")"
+						expr = "$i." + tmp[1] + "(" + expr + (tmp[2] ? "," + tmp[2] : "") + ")"
 					}
 				}
 			}
@@ -276,6 +276,7 @@
 	i18n.locase = function(str) {
 		return isString(str) ? str.toLowerCase() : "" + str
 	}
+	i18n.json = JSON.stringify
 
 
 }(this, Object, Function)

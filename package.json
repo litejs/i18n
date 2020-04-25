@@ -1,6 +1,6 @@
 {
   "name": "@litejs/i18n",
-  "version": "20.0.0-rc.5",
+  "version": "20.0.0-rc.7",
   "license": "MIT",
   "author": "Lauri Rooden <lauri@rooden.ee>",
   "description": "Simple i18n",

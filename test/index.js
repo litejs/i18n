@@ -134,6 +134,16 @@ describe("i18n", function() {
 		assert.end()
 	})
 
+	it("should format map", function(assert, mock) {
+		assert.equal(i18n('{{a:1+2};json}'), '{"a":3}')
+		assert.equal(i18n('{[1+2,"2"];json}'), '[3,"2"]')
+		assert.equal(i18n('{[{a:1+2},"2"];json}'), '[{"a":3},"2"]')
+		assert.equal(i18n('{[{a:1+2},"2"];json:}'), '[{"a":3},"2"]')
+		assert.equal(i18n('{[{a:1+2},"2"];json:null}'), '[{"a":3},"2"]')
+		assert.equal(i18n('{[{a:1+2},"2"];json:null,1}'), '[\n {\n  "a": 3\n },\n "2"\n]')
+		assert.end()
+	})
+
 	it("should format numbers", function(assert) {
 		// i18n.number
 		// format;0-value?;NaN-value;roundPoint;negFormat
