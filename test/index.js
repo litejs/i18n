@@ -13,11 +13,12 @@ describe("i18n", function() {
 			"et": "Eesti keeles",
 			"ar": "Arabic",
 			"en": "In English",
-			"fr-CH": "French (Switzerland)"
+			"fr-CH": "French (Switzerland)",
+			"pl": "Po polsku"
 		})
 
 		assert.equal(i18n.current, "et")
-		.equal(i18n.list, ["et", "ar", "en", "fr-CH"])
+		.equal(i18n.list, ["et", "ar", "en", "fr-CH", "pl"])
 		.end()
 	})
 
@@ -30,7 +31,7 @@ describe("i18n", function() {
 			save: "Save",
 			user: {
 				"": "User",
-				"*": "1 user;# users",
+				"*": "one user;# users",
 				"save": "Save User"
 			}
 		})
@@ -86,11 +87,7 @@ describe("i18n", function() {
 			"a.Name": "Nimi A"
 		})
 		i18n.add("en", {
-			ordinal: "th;st;nd;rd;o[n%=100]||o[(n-20)%10]||o[0]",
-			plural: {
-				_: "n!=1"
-
-			}
+			ordinal: "th;st;nd;rd;o[n%=100]||o[(n-20)%10]||o[0]"
 		})
 
 		i18n.add("fr-ch", {
@@ -146,6 +143,7 @@ describe("i18n", function() {
 	it("should format numbers", function(assert) {
 		// i18n.number
 		// format;0-value?;NaN-value;roundPoint;negFormat
+		assert.equal(i18n("{power;#0,1 s5}W", {power: 1234}), "1,2 kW")
 		assert
 		.equal(i18n.number(0, "#.01"), ".00")
 		.equal(i18n.number(0, "#.01;-"), ".00")
@@ -185,7 +183,10 @@ describe("i18n", function() {
 		.equal(i18n.number(90, "#,###,##,##2.00"), "90.00")
 
 		.equal(i18n.number(1235.123, "00,005.00"), "01,235.00")
+		assert.end()
+	})
 
+	it("should format fractions", function(assert) {
 		assert
 		.equal(i18n.number(.70, "#.25"), ".75")
 		.equal(i18n.number(.10, "#/4"), "0")
@@ -295,6 +296,59 @@ describe("i18n", function() {
 		assert.equal(i18n.detect("fr-CH"), "fr-ch")
 		;[ "1er", "2ème"].forEach(assertOrdinal)
 
+		assert.end()
+	})
+
+	it("should format plurals", function(assert) {
+		i18n.add("pl-1", {
+			"*": {
+				"": "n==0||n==1?n:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?2:3",
+				"file": "zero plików;1 plik;# pliki;# plików"
+			},
+			"book": "Zero książek;Jedna książka;# książki;# książek"
+		})
+		i18n.add("pl-2", {
+			"*": "n==1?0:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?1:2",
+			"file": "1 plik;# pliki;# plików"
+		})
+		i18n.add("pl-3", {
+			"*": "n==1?0:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?1:2",
+			"file": {
+				"*": "1 plik;# pliki;# plików"
+			}
+		})
+
+		i18n.use("pl-1")
+		assert
+		.equal(i18n.plural(1, "file"), "1 plik")
+		.equal(i18n.plural(2, "file"), "2 pliki")
+		.equal(i18n.plural(4, "file"), "4 pliki")
+		.equal(i18n.plural(5, "file"), "5 plików")
+		.equal(i18n("{1;*file} {2;*file}", {num:1}), "1 plik 2 pliki")
+		.equal(i18n("{1;*book} {2;*book} {5;*book} {22;*book}", {num:1}), "Jedna książka 2 książki 5 książek 22 książki")
+
+		i18n.use("pl-2")
+		assert
+		.equal(i18n("{1;*file} {2;*file}", {num:1}), "1 plik 2 pliki")
+
+		i18n.use("pl-3")
+		assert
+		.equal(i18n("{1;*file} {2;*file}", {num:1}), "1 plik 2 pliki")
+		assert.end()
+	})
+
+	it("should pick", function(assert) {
+		i18n.use("en")
+		i18n.add("en", {
+			They: "They;male=He;female=She"
+		})
+		assert
+		.equal(i18n.pick(11, "low;30=med;60="), "low")
+		.equal(i18n.pick(31, "low;30=med;60="), "med")
+		.equal(i18n.pick("", "low;30=med;;"), "low")
+		.equal(i18n.pick("male", "They;male=He;female=She"), "He")
+		.equal(i18n.pick("other", "They;male=He;female=She"), "They")
+		.equal(i18n("was {sex;?They}", {sex:"male"}), "was He")
 		assert.end()
 	})
 })

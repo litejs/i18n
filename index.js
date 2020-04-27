@@ -6,7 +6,7 @@
 	, cache = {}
 	, formatRe = /\\{|{\\|'|\n|{({[\s\S]*}|\[[\s\S]*]|(?:("|')(?:\\?.)*?\2|[^;{}])+?)(?:;((?:(['"\/])(?:\\?.)*?\4[gim]*|[^}])*))?}/g
 	, exprFound
-	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:\$|false|in|null|true|typeof|void)\b|\.\w+|\w+\s*:|\s+/g
+	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:[$_]|false|in|null|true|typeof|void)\b|\.\w+|\w+\s*:|\s+/g
 	, wordRe = /(\$?)([a-z_][\w$]*)/ig
 	, pattRe = /(\w+)(?::((?:(['"\/])(?:\\?.)*?\3[gim]*|[^;])*))?/g
 	, pointerRe = /^([\w ]+)\.([\w ]+)$/
@@ -53,7 +53,7 @@
 		var fn = str.replace(formatRe, formatFn)
 		if (exprFound) try {
 			var keys = Object.values(exprFound)
-			return Function("$,$i,$g", (keys[0] ? "var " + keys + ";": "") + "return('" + fn + "')")
+			return Function("$,_,$g", (keys[0] ? "var " + keys + ";": "") + "return('" + fn + "')")
 		} catch (e) {
 			/*** debug
 			console.log("makeFn", fn)
@@ -76,11 +76,11 @@
 			}
 
 			if (pattern = getFn(pattern, currentMap, pattern)) {
-				if (tmp = ext[pattern.charAt(0)]) {
-					expr = "$i." + tmp + "(" + expr + ",'" + pattern.replace(/'/g, "\\'") + "')"
+				if (ext[tmp = pattern.charAt(0)]) {
+					expr = "_." + ext[tmp] + "(" + expr + ",'" + pattern.slice(tmp == "#" ? 0 : 1).replace(/'/g, "\\'") + "')"
 				} else {
 					for (; tmp = pattRe.exec(pattern); ) {
-						expr = "$i." + tmp[1] + "(" + expr + (tmp[2] ? "," + tmp[2] : "") + ")"
+						expr = "_." + tmp[1] + ".call($," + expr + (tmp[2] ? "," + tmp[2] : "") + ")"
 					}
 				}
 			}
@@ -130,6 +130,14 @@
 
 	function isString(str) {
 		return typeof str === "string"
+	}
+	function isObject(obj) {
+		return obj && obj.constructor === Object
+	}
+	function getStr(sub, word, fallback) {
+		return isObject(currentMap[word]) && currentMap[word][sub] ||
+		isObject(currentMap[sub]) && currentMap[sub][word] ||
+		currentMap[word || sub] || fallback
 	}
 
 	/*** i18n.detect ***/
@@ -241,25 +249,27 @@
 	}
 	/**/
 
-	/*
-	S.pick = N.pick = function() {
-		var val = this + "="
-		for (var s, a = arguments, i = 0, len = a.length; i < len;) {
-			s = a[i++]
-			if (s.indexOf(val) == 0) {
-				s = s.slice(val.length)
-				i = len
+	/*** i18n.pick ***/
+	i18n[ext["?"] = "pick"] = pick
+	function pick(val, word) {
+		for (var arr = getStr("?", word, word).replace(/(\w+)\?/g, "$1=$1;").split(/[;=]/), i = 1|arr.length; i > 0; ) {
+			if ((i-=2) < 0 || arr[i] && (arr[i] == "" + val || +arr[i] <= val)) {
+				return arr[i + 1] || ""
 			}
 		}
-		return s.replace("#", this)
 	}
+	/**/
 
-	S.plural = N.plural = function() {
-		// Plural-Forms: nplurals=2; plural=n != 1;
-		// http://www.gnu.org/software/gettext/manual/html_mono/gettext.html#Plural-forms
-		return arguments[ +Fn("n->" + (String.plural || "n!=1"))( parseFloat(this) ) ].replace("#", this)
+	/*** i18n.plural ***/
+	i18n[ext["*"] = "plural"] = plural
+	function plural(n, word) {
+		var expr = getStr("*", "", "n!=1")
+		return (cache[expr] || (cache[expr] = Function(
+			"a,n",
+			"return (a[+(" + expr + ")]||a[0]).replace('#',n)"
+		)))((getStr("*", word, "# " + word)).split(";"), n)
 	}
-	*/
+	/**/
 
 	i18n.map = function(input, str, sep, lastSep) {
 		if (!isArray(input)) return input
