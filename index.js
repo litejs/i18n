@@ -26,24 +26,24 @@
 	function i18n(str, data) {
 		if (typeof str === "number") return "" + str
 		var out = cache[str] || (
-			cache[str] = makeFn(getFn(str, currentMap) || str)
+			cache[str] = makeFn(get(str) || str)
 		)
 		return isString(out) ? out : out(data || {}, i18n, globalVals)
 	}
 
-	function getFn(str, map, fallback) {
+	function get(str, fallback) {
 		var tmp
 		return isString(str) ? (
-			isString(map[str]) ? map[str] :
-			typeof map[str] === "object" ? map[str][""] :
+			isString(currentMap[str]) ? currentMap[str] :
+			typeof currentMap[str] === "object" ? currentMap[str][""] :
 			(tmp = pointerRe.exec(str)) && (
-				typeof map[tmp[1]] === "object" &&
-				map[tmp[1]][tmp[2]] ||
-				map[tmp[2]]
+				typeof currentMap[tmp[1]] === "object" &&
+				currentMap[tmp[1]][tmp[2]] ||
+				currentMap[tmp[2]]
 			) || fallback
 		) :
 		isArray(str) ?
-		getFn(str[0], map, getFn(str[1], map, getFn(str[2], map, fallback))) :
+		get(str[0], get(str[1], get(str[2], fallback))) :
 		fallback
 	}
 
@@ -75,7 +75,7 @@
 				) + "$g['" + tmp[2] + "']!=null?$g['" + tmp[2] + "']:''"
 			}
 
-			if (pattern = getFn(pattern, currentMap, pattern)) {
+			if (pattern = get(pattern, pattern)) {
 				if (ext[tmp = pattern.charAt(0)]) {
 					expr = "_." + ext[tmp] + "(" + expr + ",'" + pattern.slice(tmp == "#" ? 0 : 1).replace(/'/g, "\\'") + "')"
 				} else {
@@ -112,7 +112,7 @@
 		}
 	}
 
-	function get(lang) {
+	function getLang(lang) {
 		return lang && (
 			i18n[lang = ("" + lang).toLowerCase()] ||
 			i18n[lang = lang.split("-")[0]]
@@ -120,7 +120,7 @@
 	}
 
 	function use(lang) {
-		lang = get(lang)
+		lang = getLang(lang)
 		if (lang && currentLang != lang) {
 			cache = {}
 			currentMap = i18n[currentLang = i18n.current = lang] = i18n[currentLang]
@@ -147,7 +147,7 @@
 		// navigator.userLanguage for IE, navigator.language for others
 		return use([navigator.language, navigator.userLanguage].concat(
 			navigator.languages, fallback, list[0]
-		).filter(get)[0])
+		).filter(getLang)[0])
 	}
 	/**/
 
@@ -221,7 +221,7 @@
 
 		if (m2[4] == "o") {
 			number.post.o = "r+(n=d,o=g.o," + (
-				fnScope.o = getFn("ordinal", currentMap).split(";")
+				fnScope.o = get("ordinal").split(";")
 			).pop() + ")"
 		}
 
