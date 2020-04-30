@@ -140,6 +140,79 @@
 		currentMap[word || sub] || fallback
 	}
 
+	/*** i18n.date ***/
+	// P3Y6M4DT12H30M5S - P is the duration designator (referred to as "period")
+	//
+	var dateRe = /([Md])\1\1\1?|([yMdHhmswSZ])(\2?)|[uUaSeoQ]|'((?:''|[^'])*)'|(["\\\n\r\u2028\u2029])/g
+	, fns = Object.create(null)
+	, tmp1 = new Date()
+	, tmp2 = new Date()
+	, map = {
+		e: "Day()||7",
+		M: "Month()+1",
+		d: "Date()",
+		H: "Hours()",
+		h: "Hours()%12||12",
+		m: "Minutes()",
+		s: "Seconds()",
+		S: "Milliseconds()"
+	}
+
+
+	i18n[ext["@"] = "date"] = date
+	function date(input, _mask, _zone) {
+		var offset, undef
+		, date = typeof input === "number" ? input : isNaN(input) ? Date.parse(input) : +input
+		, locale = currentMap["@"]
+		, mask = locale[_mask] || _mask || locale.iso
+		, zone = _zone != undef ? _zone : Date._tz != undef ? Date._tz : undef
+		, utc = mask.slice(0, 4) == "UTC:"
+		if (zone != undef && !utc) {
+			offset = 60 * zone
+			tmp1.setTime(date + offset * 6e4)
+			utc = mask = "UTC:" + mask
+		} else {
+			tmp1.setTime(date)
+			offset = utc ? 0 : -tmp1.getTimezoneOffset()
+		}
+		return isNaN(date) ? "" + date : (
+			fns[mask] || (fns[mask] = Function("d,a,o,l", 'var t;return "' + dateStr(mask, utc) + '"')))(
+			tmp1,
+			tmp2,
+			offset,
+			locale
+		)
+	}
+
+	date.dateStr = dateStr
+	function dateStr(mask, utc) {
+		var get = "d.get" + (utc ? "UTC" : "")
+		, setA = "a.setTime(+d+((4-(" + get + map.e + "))*864e5))"
+		return (utc ? mask.slice(4) : mask).replace(dateRe, function(match, MD, single, pad, text, esc) {
+			var str = (
+				esc            ? escape(esc).replace(/%u/g, "\\u").replace(/%/g, "\\x") :
+				text != null   ? text.replace(/''/g, "'") :
+				MD             ? "l.names[" + get + (MD == "M" ? "Month" : "Day" ) + "()+" + (match == "ddd" ? 24 : MD == "d" ? 31 : match == "MMM" ? 0 : 12) + "]" :
+				match == "u"   ? "(d/1000)>>>0" :
+				match == "U"   ? "+d" :
+				match == "Q"   ? "((" + get + "Month()/3)|0)+1" :
+				match == "a"   ? "l[" + get + map.H + ">11?'pm':'am']" :
+				match == "o"   ? setA + ",a" + get.slice(1) + "FullYear()" :
+				single == "y"  ? get + "FullYear()" + (pad == "y" ? "%100" : "") :
+				single == "Z"  ? "(t=o)?(t<0?((t=-t),'-'):'+')+(t<600?'0':'')+(0|(t/60))" + (pad ? "" : "+':'") + "+((t%=60)>9?t:'0'+t):'Z'" :
+				single == "w"  ? "Math.ceil(((" + setA + "-a.s" + get.slice(3) + "Month(0,1))/864e5+1)/7)" :
+				get + map[single || match]
+			)
+			return text != null || esc ? str : '"+(' + (
+				match == "SS" ? "(t=" + str + ")>9?t>99?t:'0'+t:'00'+t" :
+				pad && single != "Z" ? "(t=" + str + ")>9?t:'0'+t" :
+				str
+			) + ')+"'
+		})
+	}
+
+	/**/
+
 	/*** i18n.detect ***/
 	i18n.detect = function(fallback) {
 		var navigator = exports.navigator || exports
