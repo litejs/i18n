@@ -67,7 +67,7 @@ describe("i18n", function() {
 	})
 
 	it("should format date", function(assert) {
-		// {start;date:'yyyy-mm'}
+		// {start;date:'y-MM-dd'}
 		// {start;@lt}
 
 
@@ -228,6 +228,8 @@ describe("i18n", function() {
 		.equal(i18n.number(void 0, "#.05"), "")
 		.equal(i18n.number(void 0, "#.05;-"), "-")
 		.equal(i18n.number(.34, "#,###.05"), ".35")
+		.equal(i18n.number(.34, "+1"), "+0")
+		.equal(i18n.number(1.34, "+1"), "+1")
 		.equal(i18n("{.34;#,###.05}"), ".35")
 		.equal(i18n.number(1234.34,  "$ #,###.05 ;;;($#)"), "$ 1,234.35 ")
 		.equal(i18n.number(-1234.34, "$ #,###.05 ;;;($#)"), "($1,234.35)")
@@ -418,7 +420,10 @@ describe("i18n", function() {
 		})
 		assert
 		.equal(i18n.pick(11, "low;30=med;60="), "low")
-		.equal(i18n.pick(31, "low;30=med;60="), "med")
+		.equal(i18n.pick(31, "low,30=med,60="), "med")
+		.equal(i18n.pick(60, "low,30,med,60,,"), "")
+		.equal(i18n.pick(61, "low;30=med;60="), "")
+		.equal(i18n.pick(62, "low;30=med;60"), "")
 		.equal(i18n.pick("", "low;30=med;;"), "low")
 		.equal(i18n.pick("male", "They;male=He;female=She"), "He")
 		.equal(i18n.pick("other", "They;male=He;female=She"), "They")

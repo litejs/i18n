@@ -323,9 +323,11 @@
 	/**/
 
 	/*** i18n.pick ***/
+	var pickRe1 = /(\w+)\?/g
+	, pickRe2 = /[;=,]/
 	i18n[ext["?"] = "pick"] = pick
 	function pick(val, word) {
-		for (var arr = getStr("?", word, word).replace(/(\w+)\?/g, "$1=$1;").split(/[;=]/), i = 1|arr.length; i > 0; ) {
+		for (var arr = getStr("?", word, word).replace(pickRe1, "$1=$1;").split(pickRe2), i = 1|arr.length; i > 0; ) {
 			if ((i-=2) < 0 || arr[i] && (arr[i] == "" + val || +arr[i] <= val)) {
 				return arr[i + 1] || ""
 			}
