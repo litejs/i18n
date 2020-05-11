@@ -351,7 +351,10 @@ describe("i18n", function() {
 		// custom formats
 		assert.equal(i18n.number(0.3363, "0.01 %"), "33.63 %")
 
+		assert.end()
+	})
 
+	it("should format ordinal", function(assert) {
 		function assertOrdinal(i) {
 			assert.equal(i18n.number(parseInt(i), "1o"), i)
 		}
@@ -393,6 +396,15 @@ describe("i18n", function() {
 				"*": "1 plik;# pliki;# plików"
 			}
 		})
+		i18n.add("uk", {
+			"#": {
+				"1": "# ##0,1"
+			},
+			"*": "n%1?3:n%10==1&&n%100!=11?0:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?1:2",
+			"day": {
+				"*": "1 день;# дні;# днів;# дня"
+			}
+		})
 
 		i18n.use("pl-1")
 		assert
@@ -400,16 +412,21 @@ describe("i18n", function() {
 		.equal(i18n.plural(2, "file"), "2 pliki")
 		.equal(i18n.plural(4, "file"), "4 pliki")
 		.equal(i18n.plural(5, "file"), "5 plików")
-		.equal(i18n("{1;*file} {2;*file}", {num:1}), "1 plik 2 pliki")
-		.equal(i18n("{1;*book} {2;*book} {5;*book} {22;*book}", {num:1}), "Jedna książka 2 książki 5 książek 22 książki")
+		.equal(i18n("{1;*file} {2;*file}"), "1 plik 2 pliki")
+		.equal(i18n("{1;*book} {2;*book} {5;*book} {22;*book}"), "Jedna książka 2 książki 5 książek 22 książki")
 
 		i18n.use("pl-2")
 		assert
-		.equal(i18n("{1;*file} {2;*file}", {num:1}), "1 plik 2 pliki")
+		.equal(i18n("{1;*file} {2;*file}"), "1 plik 2 pliki")
 
 		i18n.use("pl-3")
 		assert
-		.equal(i18n("{1;*file} {2;*file}", {num:1}), "1 plik 2 pliki")
+		.equal(i18n("{1;*file} {2;*file}"), "1 plik 2 pliki")
+
+		i18n.use("uk")
+		assert
+		.equal(i18n("{1;*day} {2;*day} {5;*day} {1.3;*day} {2.3;*day} {5.3;*day}"), "1 день 2 дні 5 днів 1.3 дня 2.3 дня 5.3 дня")
+
 		assert.end()
 	})
 

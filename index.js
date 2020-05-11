@@ -312,8 +312,8 @@
 	function numJunk(arr, i, lastLen, dec) {
 		var len = lastLen + arr[i].length - 1
 
-		return "(i<1e" + len + "?r" + (
-			lastLen ? ".slice(0,-" + (lastLen + dec) + "):" : ":"
+		return "(i<1e" + len + (
+			lastLen ? "?r.slice(0,-" + (lastLen + dec) + "):" : "?r:"
 		) + (
 			len < 16 ? numJunk(arr, i?i-1:i, len, dec) : "r.slice(0,-" + (lastLen + dec) + ")"
 		) + "+'" + arr[i].charAt(0).replace("'", "\\'") + "'+r.slice(-" + (len + dec) + (
