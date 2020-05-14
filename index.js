@@ -228,8 +228,9 @@
 	var numRe1 = /([^\d#]*)([\d# .,_·']*\/?\d+)(?:(\s*)([a-z%]+)(\d*))?(.*)/
 	, numRe2 = /([.,\/])(\d+)(?![\d.,])/
 
-	i18n[ext["#"] = "number"] = number
-	function number(input, format) {
+	i18n[ext["#"] = ext["+"] = "number"] = number
+	function number(input, _format) {
+		var format = getStr("#", _format.slice(1), _format)
 		return (cache[format] || (cache[format] = Function(
 			"d,g",
 			"var s,i,N,n,r,o;return " + numStr(format)

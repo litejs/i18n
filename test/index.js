@@ -215,8 +215,19 @@ describe("i18n", function() {
 	})
 
 	it("should format numbers", function(assert) {
+		i18n.add("et", {
+			"#": {
+				temp: "+1°C;-°C;;-#°C",
+				temp1: "+0,1°C;-°C;;-#°C"
+			}
+		})
+		i18n.use("et")
 		// i18n.number
-		// format;0-value?;NaN-value;roundPoint;negFormat
+		// format;NaN-value;roundPoint;negFormat
+		assert.equal(
+			i18n("{p;#temp} {p;#temp1} {u;#temp} {n;#temp} {n;#temp1}", {p: 12.35, n: -12.35}),
+			"+12°C +12,4°C -°C -12°C -12,4°C"
+		)
 		assert.equal(i18n("{power;#0,1 s5}W", {power: 1234}), "1,2 kW")
 		assert
 		.equal(i18n.number(0, "#.01"), ".00")
