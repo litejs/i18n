@@ -4,7 +4,7 @@
 	var currentLang, currentMap
 	, isArray = Array.isArray
 	, cache = {}
-	, formatRe = /\\{|{\\|'|\n|{({[\s\S]*}|\[[\s\S]*]|(?:("|')(?:\\?.)*?\2|[^;{}])+?)(?:;((?:(['"\/])(?:\\?.)*?\4[gim]*|[^}])*))?}/g
+	, formatRe = /\\\{|{\\|'|\n|{({[\s\S]*}|\[[\s\S]*]|(?:("|')(?:\\?.)*?\2|[^;{}])+?)(?:;((?:(['"\/])(?:\\?.)*?\4[gim]*|[^}])*))?}/g
 	, exprFound
 	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:[$_]|false|in|null|true|typeof|void)\b|\.\w+|\w+\s*:|\s+/g
 	, wordRe = /(\$?)([a-z_][\w$]*)/ig
@@ -135,9 +135,11 @@
 		return obj && obj.constructor === Object
 	}
 	function getStr(sub, word, fallback) {
-		return isObject(currentMap[word]) && currentMap[word][sub] ||
-		isObject(currentMap[sub]) && currentMap[sub][word] ||
-		currentMap[word || sub] || fallback
+		return currentMap && (
+			isObject(currentMap[word]) && currentMap[word][sub] ||
+			isObject(currentMap[sub]) && currentMap[sub][word] ||
+			currentMap[word || sub]
+		) || isString(fallback) && fallback || ""
 	}
 
 	/*** i18n.date ***/
