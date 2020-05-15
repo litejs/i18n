@@ -4,8 +4,7 @@
 	var currentLang, currentMap
 	, isArray = Array.isArray
 	, cache = {}
-	, formatRe = /\\\{|{\\|'|\n|{({[\s\S]*}|\[[\s\S]*]|(?:("|')(?:\\?.)*?\2|[^;{}])+?)(?:;((?:(['"\/])(?:\\?.)*?\4[gim]*|[^}])*))?}/g
-	, exprFound
+	, formatRe = /{(?!;)({[\s\S]*}|\[[\s\S]*]|(?:("|')(?:\\?.)*?\2|[^;{}])+?)(?:;((?:(['"\/])(?:\\?.)*?\4[gim]*|[^}])*))?}/g
 	, exprRe = /(['"\/])(?:\\?.)*?\1[gim]*|\b(?:[$_]|false|in|null|true|typeof|void)\b|\.\w+|\w+\s*:|\s+/g
 	, wordRe = /(\$?)([a-z_][\w$]*)/ig
 	, pattRe = /(\w+)(?::((?:(['"\/])(?:\\?.)*?\3[gim]*|[^;])*))?/g
@@ -49,34 +48,18 @@
 
 
 	function makeFn(str) {
-		exprFound = 0
-		var key, keys, fn = str.replace(formatRe, formatFn)
-		if (exprFound) try {
-			keys = []
-			for (key in exprFound) keys.push(exprFound[key])
-			return Function("$,_,$g", (keys[0] ? "var " + keys + ";": "") + "return('" + fn + "')")
-		} catch (e) {
-			/*** debug
-			console.log("makeFn", fn)
-			console.log(e)
-			/**/
-		}
-		return fn.replace(/\\'/g, "'")
-	}
-
-	function formatFn(_, expr, q, pattern) {
-		if (expr) {
-			if (!exprFound) exprFound = {}
-			var tmp
-			, vars = expr.replace(exprRe, "")
-
-			for (; tmp = wordRe.exec(vars); ) {
-				exprFound[tmp[0]] = tmp[0] + (
+		var tmp, m, expr, pattern
+		, args = ""
+		, fn = ""
+		, lastIndex = 0
+		for (; m = formatRe.exec(str); ) {
+			for (expr = m[1].replace(exprRe, ""); tmp = wordRe.exec(expr); ) {
+				args += (args ? "," : "var ") + tmp[0] + (
 					tmp[1] ? "=" : "=$['" + tmp[0] + "']!=null?$['" + tmp[0] + "']:"
 				) + "$g['" + tmp[2] + "']!=null?$g['" + tmp[2] + "']:''"
 			}
-
-			if (pattern = get(pattern, pattern)) {
+			expr = m[1]
+			if (pattern = get(m[3], m[3])) {
 				if (ext[tmp = pattern.charAt(0)]) {
 					expr = "_." + ext[tmp] + "(" + expr + "," + quote(pattern.slice(tmp == "#" ? 0 : 1)) + ")"
 				} else {
@@ -85,10 +68,24 @@
 					}
 				}
 			}
-
-			return "'+(" + expr + ")+'"
+			fn += (fn ? "+" : "") + (
+				lastIndex < m.index ?
+				quote(str.slice(lastIndex, m.index)) + "+(" : "("
+			)  + expr + ")"
+			lastIndex = m.index + m[0].length
 		}
-		return _ == "'" ?  "\\'" : _ == "\n" ? "\\n" : "{"
+
+		if (fn[0]) try {
+			return Function("$,_,$g", args + ";return(" + fn + (
+				lastIndex < str.length ? ")+" + quote(str.slice(lastIndex)) : ")"
+			))
+		} catch (e) {
+			/*** debug
+			console.log("makeFn", str, args, fn)
+			console.log(e)
+			/**/
+		}
+		return str.replace(/{;/g, "{")
 	}
 
 	function add(lang, texts) {
