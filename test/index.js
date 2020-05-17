@@ -217,20 +217,32 @@ describe("i18n", function() {
 	it("should format numbers", function(assert) {
 		i18n.add("et", {
 			"#": {
-				temp: "+1°C;-°C;;-#°C",
-				temp1: "+0,1°C;-°C;;-#°C"
+				temp: "+1°C;-°C;-#°C",
+				temp1: "+0,1°C;-°C;-#°C"
 			}
 		})
 		i18n.use("et")
-		// i18n.number
-		// format;NaN-value;roundPoint;negFormat
+		// format;NaN;negFormat;0;Infinity;-Infinity;roundPoint
 		assert.equal(
 			i18n("{p;#temp} {p;#temp1} {u;#temp} {n;#temp} {n;#temp1}", {p: 12.35, n: -12.35}),
 			"+12°C +12,4°C -°C -12°C -12,4°C"
 		)
-		assert.equal(i18n("{power;#0,1 s5}W", {power: 1234}), "1,2 kW")
+		assert.equal(
+			i18n("{a;#5} {b;#5} {c;#5} {d;#5} {e;#5} {f;#5}", {a: 6, b: 4, c: 1, d: -1, e: -4, f: -6}),
+			"5 5 0 0 -5 -5"
+		)
+		assert.equal(
+			i18n("{a;#1} {b;#1} {a;#1;;;;lot} {b;#1;;;;;-lot} {c;#1;;;NULL}", {a: Infinity, b: -Infinity, c: 0}),
+			"∞ -∞ lot -lot NULL"
+		)
+
 		assert
+		.equal(i18n("{power;#0,1 s5}W", {power: 1234}), "1,2 kW")
 		.equal(i18n.number(0, "#.01"), ".00")
+		.equal(i18n.number(0.00000000000000001, "#.01"), ".00")
+		.equal(i18n.number(-0.00000000000000001, "#.01"), ".00")
+		.equal(i18n.number(9007199254740990, "#.01"), "9007199254740990.00")
+		.equal(i18n.number(-9007199254740990, "#.01"), "-9007199254740990.00")
 		.equal(i18n.number(0, "#.01;-"), ".00")
 		.equal(i18n.number(NaN, "#.05"), "")
 		.equal(i18n.number(NaN, "#.05;-"), "-")
@@ -241,18 +253,20 @@ describe("i18n", function() {
 		.equal(i18n.number(.34, "#,###.05"), ".35")
 		.equal(i18n.number(.34, "+1"), "+0")
 		.equal(i18n.number(1.34, "+1"), "+1")
+		.equal(i18n.number(-1.34, "+1"), "-1")
 		.equal(i18n("{.34;#,###.05}"), ".35")
-		.equal(i18n.number(1234.34,  "$ #,###.05 ;;;($#)"), "$ 1,234.35 ")
-		.equal(i18n.number(-1234.34, "$ #,###.05 ;;;($#)"), "($1,234.35)")
-		.equal(i18n.number(-1234.34, "#,###.05 ;;;(#)"), "(1,234.35)")
-		.equal(i18n.number(-1234.34, "#,###.05 ;;;#-"), "1,234.35-")
-		.equal(i18n.number(.34, "#,###.05 ;;;(#)"), ".35 ")
+		.equal(i18n.number(1234.34,  "$ #,###.05 ;;($#)"), "$ 1,234.35 ")
+		.equal(i18n.number(-1234.34, "$ #,###.05 ;;($#)"), "($1,234.35)")
+		.equal(i18n.number(-1234.34, "#,###.05 ;;(#)"), "(1,234.35)")
+		.equal(i18n.number(-1234.34, "#,###.05 ;;#-"), "1,234.35-")
+		.equal(i18n.number(.34, "#,###.05 ;;(#)"), ".35 ")
 		.equal(i18n.number(.36, "#,##0.05"), "0.35")
 		.equal(i18n.number(.31, "#,#00.05"), "00.30")
 		.equal(i18n.number(1.005, "0.01"), "1.01")
-		.equal(i18n.number(1.005, "0.01;;.1"), "1.00")
-		.equal(i18n.number(1.005, "0.01;;.5"), "1.01")
-		.equal(i18n.number(1.005, "0.01;;1"), "1.01")
+		// roundPoint
+		.equal(i18n.number(1.005, "0.01;;;;;;.1"), "1.00")
+		.equal(i18n.number(1.005, "0.01;;;;;;.5"), "1.01")
+		.equal(i18n.number(1.005, "0.01;;;;;;1"), "1.01")
 		.equal(i18n.number(1.005, "#.01"), "1.01")
 		.equal(i18n.number(9, "#10"), "10")
 		.equal(i18n.number(-9, "#10"), "-10")

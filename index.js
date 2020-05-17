@@ -228,14 +228,14 @@
 
 	/*** i18n.number ***/
 	var numRe1 = /([^\d#]*)([\d# .,_·']*\/?\d+)(?:(\s*)([a-z%]+)(\d*))?(.*)/
-	, numRe2 = /([.,\/])(\d+)(?![\d.,])/
+	, numRe2 = /([.,\/])(\d*)$/
 
 	i18n[ext["#"] = ext["+"] = "number"] = number
 	function number(input, _format) {
 		var format = getStr("#", _format.slice(1), _format)
 		return (cache[format] || (cache[format] = Function(
 			"d,g",
-			"var s,i,N,n,r,o;return " + numStr(format)
+			"var N=d<0&&(d=-d),n,r,o;return " + numStr(format)
 		)))(input, fnScope)
 	}
 	number.pre = {
@@ -245,8 +245,7 @@
 	}
 
 	function numStr(format) {
-		// totalLength
-		// format;0-value?;NaN-value;roundPoint;negFormat
+		// format;NaN;negFormat;0;Infinity;-Infinity;roundPoint
 		var conf = format.split(";")
 		, m2 = numRe1.exec(conf[0])
 		, m3 = numRe2.exec(m2[2])
@@ -256,39 +255,39 @@
 		, sLen = num.length
 		, step = decimals ? +(m3[1] === "/" ? 1 / m3[2] : num + "." + m3[2]) : num
 		, decSep = m3 && m3[1]
-		, fn = "d<0&&(N=d=-d)||d>0||d===0?(o='" + m2[3] + "'," + (number.pre[m2[4]] || "") + "s=" + (
+		, fn = "d===Infinity?(N?'" + (conf[5]||"-∞") + "':'" + (conf[4]||"∞") + "'):d>0||d===0?(o='" + m2[3] + "'," + (number.pre[m2[4]] || "") + "n=" + (
 			// Use exponential notation to fix float rounding
 			// Math.round(1.005*100)/100 = 1 instead of 1.01
 			decimals ?
-			"(d+'e" + decimals + "')/" + (step + "e" + decimals) :
-			"d/" + num
-		) + ",i=Math.floor(s" + (
-			conf[2] == 1 ? "%1?s+1:s" : "+" + (conf[2] || .5)
-		) + ")*" + step
+			"d>1e-" + (decimals + 1) + "?(n=(d+'e" + decimals + "')/" + (step + "e" + decimals) + "":
+			"d>"+num+"e-1?(n=d/" + num
+		) + ",Math.floor(n" + (
+			conf[6] == 1 ? "%1?n+1:n" : "+" + (conf[6] || .5)
+		) + ")*" + step + "):0,r="
 
 		if (decimals) {
 			fn += (m2[5] ?
-				",r=(''+(+i.toFixed(" + (m2[5] < 4 ? 2 : m2[5]-2) + "-(i<10?0:i<100?1:2)-o.length" + ")))" :
-				",r=i.toFixed(" + decimals + ")"
+				"(''+(+n.toFixed(" + (m2[5] < 4 ? 2 : m2[5]-2) + "-(n<10?0:n<100?1:2)-o.length)))" :
+				"n.toFixed(" + decimals + ")"
 			)
 			if (decSep == "/") {
 				fn += ".replace(/\\.\\d+/,'" + (
 					m3[2] == 5 ?
 					"⅕⅖⅗⅘'.charAt(5" :
 					"⅛¼⅜½⅝¾⅞'.charAt(8"
-				) + "*(i%1)-1))"
+				) + "*(n%1)-1))"
 			} else if (decSep != ".") {
 				fn += ".replace('.','" + decSep + "')"
 			}
 			if (sLen === 0) {
-				fn += ",i<1&&(r=r.slice(1)||'0')"
+				fn += ",n<1&&(r=r.slice(1)||'0')"
 			}
 		} else {
-			fn += ",r=i+''"
+			fn += "n+''"
 		}
 		if (sLen > 1) {
 			if (decimals) sLen += decimals + 1
-			fn += ",r=(r.length<" + sLen + "?('0000000000000000'+r).slice(-" + sLen + "):r)"
+			fn += ",r=(r.length<" + sLen + "?(1e15+r).slice(-" + sLen + "):r)"
 		}
 
 		if (num = full.match(/[^\d#][\d#]+/g)) {
@@ -296,7 +295,7 @@
 		}
 
 		if (m2[4] == "o") {
-			number.post.o = "r+(n=d,o=g.o," + (
+			number.post.o = "r+(o=g.o," + (
 				fnScope.o = get("ordinal").split(";")
 			).pop() + ")"
 		}
@@ -304,7 +303,8 @@
 		fn += (
 			(m2[4] ? ",r=" + (number.post[m2[4]] || "r+o") : "") +
 			// negative format
-			",N?'" + (conf[3] || "-#").replace("#", "'+r+'") + "':" +
+			",N&&n>0?'" + (conf[2] || "-#").replace("#", "'+r+'") + "':" +
+			(conf[3] ? "n===0?'" + conf[3] + "':" : "") +
 			(m2[1] ? "'" + m2[1]+ "'+r" : "r") +
 			(m2[6] ? "+'" + m2[6] + "'" : "")
 		)
@@ -315,7 +315,7 @@
 	function numJunk(arr, i, lastLen, dec) {
 		var len = lastLen + arr[i].length - 1
 
-		return "(i<1e" + len + (
+		return "(n<1e" + len + (
 			lastLen ? "?r.slice(0,-" + (lastLen + dec) + "):" : "?r:"
 		) + (
 			len < 16 ? numJunk(arr, i?i-1:i, len, dec) : "r.slice(0,-" + (lastLen + dec) + ")"
