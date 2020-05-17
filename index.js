@@ -50,9 +50,10 @@
 
 	function makeFn(str) {
 		exprFound = 0
-		var fn = str.replace(formatRe, formatFn)
+		var key, keys, fn = str.replace(formatRe, formatFn)
 		if (exprFound) try {
-			var keys = Object.values(exprFound)
+			keys = []
+			for (key in exprFound) keys.push(exprFound[key])
 			return Function("$,_,$g", (keys[0] ? "var " + keys + ";": "") + "return('" + fn + "')")
 		} catch (e) {
 			/*** debug
