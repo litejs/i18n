@@ -78,7 +78,7 @@
 
 			if (pattern = get(pattern, pattern)) {
 				if (ext[tmp = pattern.charAt(0)]) {
-					expr = "_." + ext[tmp] + "(" + expr + ",'" + pattern.slice(tmp == "#" ? 0 : 1).replace(/'/g, "\\'") + "')"
+					expr = "_." + ext[tmp] + "(" + expr + "," + quote(pattern.slice(tmp == "#" ? 0 : 1)) + ")"
 				} else {
 					for (; tmp = pattRe.exec(pattern); ) {
 						expr = "_." + tmp[1] + ".call($," + expr + (tmp[2] ? "," + tmp[2] : "") + ")"
@@ -141,6 +141,9 @@
 			isObject(currentMap[sub]) && currentMap[sub][word] ||
 			currentMap[word || sub]
 		) || isString(fallback) && fallback || ""
+	}
+	function quote(str) {
+		return "'" + (str || "").replace(/'/g, "\\'").replace(/\n/g, "\\n") + "'"
 	}
 
 	/*** i18n.date ***/
@@ -256,7 +259,7 @@
 		, sLen = num.length
 		, step = decimals ? +(m3[1] === "/" ? 1 / m3[2] : num + "." + m3[2]) : num
 		, decSep = m3 && m3[1]
-		, fn = "d===Infinity?(N?'" + (conf[5]||"-∞") + "':'" + (conf[4]||"∞") + "'):d>0||d===0?(o='" + m2[3] + "'," + (number.pre[m2[4]] || "") + "n=" + (
+		, fn = "d===Infinity?(N?" + quote(conf[5]||"-∞") + ":" + quote(conf[4]||"∞") + "):d>0||d===0?(o=" + quote(m2[3]) + "," + (number.pre[m2[4]] || "") + "n=" + (
 			// Use exponential notation to fix float rounding
 			// Math.round(1.005*100)/100 = 1 instead of 1.01
 			decimals ?
@@ -304,13 +307,13 @@
 		fn += (
 			(m2[4] ? ",r=" + (number.post[m2[4]] || "r+o") : "") +
 			// negative format
-			",N&&n>0?'" + (conf[2] || "-#").replace("#", "'+r+'") + "':" +
-			(conf[3] ? "n===0?'" + conf[3] + "':" : "") +
-			(m2[1] ? "'" + m2[1]+ "'+r" : "r") +
-			(m2[6] ? "+'" + m2[6] + "'" : "")
+			",N&&n>0?" + quote(conf[2] || "-#").replace("#", "'+r+'") + ":" +
+			(conf[3] ? "n===0?" + quote(conf[3]) + ":" : "") +
+			(m2[1] ? quote(m2[1]) + "+r" : "r") +
+			(m2[6] ? "+" + quote(m2[6]) : "")
 		)
 
-		return fn + "):'" + (conf[1] || "") + "'"
+		return fn + "):" + quote(conf[1])
 	}
 
 	function numJunk(arr, i, lastLen, dec) {

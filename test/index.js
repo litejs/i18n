@@ -232,8 +232,8 @@ describe("i18n", function() {
 			"5 5 0 0 -5 -5"
 		)
 		assert.equal(
-			i18n("{a;#1} {b;#1} {a;#1;;;;lot} {b;#1;;;;;-lot} {c;#1;;;NULL}", {a: Infinity, b: -Infinity, c: 0}),
-			"∞ -∞ lot -lot NULL"
+			i18n("{a;#1} {b;#1} {a;#1;;;;lot} {b;#1;;;;;-lot's} {c;#1;;;NULL}", {a: Infinity, b: -Infinity, c: 0}),
+			"∞ -∞ lot -lot's NULL"
 		)
 
 		assert
