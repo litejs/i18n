@@ -248,6 +248,7 @@
 	function numStr(format) {
 		// format;NaN;negFormat;0;Infinity;-Infinity;roundPoint
 		var conf = format.split(";")
+		, nan_value = conf[1] || "-"
 		, m2 = numRe1.exec(conf[0])
 		, m3 = numRe2.exec(m2[2])
 		, decimals = m3 && m3[2].length || 0
@@ -256,7 +257,7 @@
 		, sLen = num.length
 		, step = decimals ? +(m3[1] === "/" ? 1 / m3[2] : num + "." + m3[2]) : num
 		, decSep = m3 && m3[1]
-		, fn = "d===Infinity?(N?" + quote(conf[5]||"-∞") + ":" + quote(conf[4]||"∞") + "):d>0||d===0?(o=" + quote(m2[3]) + "," + (number.pre[m2[4]] || "") + "n=" + (
+		, fn = "d===Infinity?(N?" + quote(conf[5]||nan_value) + ":" + quote(conf[4]||nan_value) + "):d>0||d===0?(o=" + quote(m2[3]) + "," + (number.pre[m2[4]] || "") + "n=" + (
 			// Use exponential notation to fix float rounding
 			// Math.round(1.005*100)/100 = 1 instead of 1.01
 			decimals ?
@@ -310,7 +311,7 @@
 			(m2[6] ? "+" + quote(m2[6]) : "")
 		)
 
-		return fn + "):" + quote(conf[1])
+		return fn + "):" + quote(nan_value)
 	}
 
 	function numJunk(arr, i, lastLen, dec) {

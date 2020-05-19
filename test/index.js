@@ -231,8 +231,8 @@ describe("i18n", function() {
 			"5 5 0 0 -5 -5"
 		)
 		assert.equal(
-			i18n("{a;#1} {b;#1} {a;#1;;;;lot} {b;#1;;;;;-lot's} {c;#1;;;NULL}", {a: Infinity, b: -Infinity, c: 0}),
-			"∞ -∞ lot -lot's NULL"
+			i18n("{a;#1} {b;#1} {a;#1;-} {b;#1;-} {a;#1;;;;∞} {b;#1;;;;;-lot's} {c;#1;;;ZERO}", {a: Infinity, b: -Infinity, c: 0}),
+			"- - - - ∞ -lot's ZERO"
 		)
 
 		assert
@@ -243,11 +243,11 @@ describe("i18n", function() {
 		.equal(i18n.number(9007199254740990, "#.01"), "9007199254740990.00")
 		.equal(i18n.number(-9007199254740990, "#.01"), "-9007199254740990.00")
 		.equal(i18n.number(0, "#.01;-"), ".00")
-		.equal(i18n.number(NaN, "#.05"), "")
-		.equal(i18n.number(NaN, "#.05;-"), "-")
-		.equal(i18n.number(null, "#.05"), "")
-		.equal(i18n.number(null, "#.05;-"), "-")
-		.equal(i18n.number(void 0, "#.05"), "")
+		.equal(i18n.number(NaN, "#.05"), "-")
+		.equal(i18n.number(NaN, "#.05;𝄪"), "𝄪")
+		.equal(i18n.number(null, "#.05"), "-")
+		.equal(i18n.number(null, "#.05;⚠"), "⚠")
+		.equal(i18n.number(void 0, "#.05"), "-")
 		.equal(i18n.number(void 0, "#.05;-"), "-")
 		.equal(i18n.number(.34, "#,###.05"), ".35")
 		.equal(i18n.number(.34, "+1"), "+0")
