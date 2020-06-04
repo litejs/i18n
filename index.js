@@ -240,7 +240,7 @@
 		)))(input, fnScope)
 	}
 	number.pre = {
-		s: "(o+=d<1e3?'':d<1e6?(d/=1e3,'k'):d<1e9?(d/=1e6,'M'):(d/=1e9,'G')),"
+		a: "(o+=d<1e3?'':d<1e6?(d/=1e3,'k'):d<1e9?(d/=1e6,'M'):d<1e12?(d/=1e9,'G'):d<1e15?(d/=1e12,'T'):d<1e18?(d/=1e15,'P'):(d/=1e18,'E')),"
 	}
 	number.post = {
 	}
@@ -265,13 +265,13 @@
 			"d>"+num+"e-1?(n=d/" + num
 		) + ",Math.floor(n" + (
 			conf[6] == 1 ? "%1?n+1:n" : "+" + (conf[6] || .5)
-		) + ")*" + step + "):0,r="
+		) + ")*" + step + "):0,r=" + (
+			m2[5] ? "(''+(+n.toPrecision(" + (m2[5]) + ")))" :
+			decimals ? "n.toFixed(" + decimals + ")" :
+			"n+''"
+		)
 
 		if (decimals) {
-			fn += (m2[5] ?
-				"(''+(+n.toFixed(" + (m2[5] < 4 ? 2 : m2[5]-2) + "-(n<10?0:n<100?1:2)-o.length)))" :
-				"n.toFixed(" + decimals + ")"
-			)
 			if (decSep == "/") {
 				fn += ".replace(/\\.\\d+/,'" + (
 					m3[2] == 5 ?
@@ -284,8 +284,6 @@
 			if (sLen === 0) {
 				fn += ",n<1&&(r=r.slice(1)||'0')"
 			}
-		} else {
-			fn += "n+''"
 		}
 		if (sLen > 1) {
 			if (decimals) sLen += decimals + 1
