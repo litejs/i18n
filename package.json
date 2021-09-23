@@ -1,0 +1,19 @@
+{
+  "name": "@litejs/i18n",
+  "version": "21.0.0-rc.1",
+  "description": "Simple i18n",
+  "license": "MIT",
+  "author": "Lauri Rooden <lauri@rooden.ee>",
+  "keywords": [
+    "i18n",
+    "internationalization",
+    "l10n",
+    "localization",
+    "translation",
+    "litejs"
+  ],
+  "main": "i18n.js",
+  "files": [
+  ],
+  "repository": "github:litejs/i18n"
+}
