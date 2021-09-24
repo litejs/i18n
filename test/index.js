@@ -144,12 +144,12 @@ describe("i18n", function() {
 	})
 
 	it("should format map", function(assert, mock) {
-		assert.equal(i18n('{{a:1+2};json}'), '{"a":3}')
-		assert.equal(i18n('{[1+2,"2"];json}'), '[3,"2"]')
-		assert.equal(i18n('{[{a:1+2},"2"];json}'), '[{"a":3},"2"]')
-		assert.equal(i18n('{[{a:1+2},"2"];json:}'), '[{"a":3},"2"]')
-		assert.equal(i18n('{[{a:1+2},"2"];json:null}'), '[{"a":3},"2"]')
-		assert.equal(i18n('{[{a:1+2},"2"];json:null,1}'), '[\n {\n  "a": 3\n },\n "2"\n]')
+		assert.equal(i18n('{{a:1 + 2};json}'), '{"a":3}')
+		assert.equal(i18n('{[1+2, "2"];json}'), '[3,"2"]')
+		assert.equal(i18n('{[{a:1+2}, "2"];json}'), '[{"a":3},"2"]')
+		assert.equal(i18n('{[{a:1+2}, "2"];json:}'), '[{"a":3},"2"]')
+		assert.equal(i18n('{[{a:1+2}, "2"];json:null}'), '[{"a":3},"2"]')
+		assert.equal(i18n('{[{a:1+2}, "2"];json:null,1}'), '[\n {\n  "a": 3\n },\n "2"\n]')
 		assert.end()
 	})
 

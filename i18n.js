@@ -101,7 +101,7 @@
 
 	function merge(target, map) {
 		for (var k in map) {
-			target[k] = map[k] && map[k].constructor === Object ? merge(create(target), map[k]) : map[k]
+			target[k] = isObject(map[k]) ? merge(create(target), map[k]) : map[k]
 		}
 		return target
 	}
