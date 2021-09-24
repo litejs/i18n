@@ -88,6 +88,7 @@ describe("i18n", function() {
 			ordinal: '"."',
 			Home: "Ko'du",
 			Name: "Nimi",
+			nested: "Nested {b}",
 			replace: "{pre}Ni'mi {name;upcase},\n{deep.map.toUpperCase() + xx} vanus {age;#1}{unit} {3+1}",
 			list: "{arr;map:'{name;map};{val}'}",
 			button: {
@@ -109,6 +110,9 @@ describe("i18n", function() {
 		assert.equal(i18n("Name"), "Nimi")
 		assert.equal(i18n(3), "3")
 		assert.equal(i18n("{;name}"), "{name}")
+		assert.equal(i18n("{'Name';}"), "Nimi")
+		assert.equal(i18n("{a;}", {a:"Name"}), "Nimi")
+		assert.equal(i18n("{a;}", {a:"nested",b:"X"}), "Nested X")
 		assert.equal(i18n("a.Name"), "Nimi A")
 		assert.equal(i18n("b.Name"), "Nimi")
 		assert.equal(i18n(["b.Name","a.Name"]), "Nimi")

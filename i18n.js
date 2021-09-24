@@ -63,8 +63,10 @@
 				) + "$g['" + tmp[2] + "']!=null?$g['" + tmp[2] + "']:''"
 			}
 			expr = m[1]
-			if (pattern = m[3]) {
-				if (ext[tmp = pattern.charAt(0)]) {
+			if (isString(pattern = m[3])) {
+				if (pattern === "") {
+					expr = "_(" + expr + ",$)"
+				} else if (ext[tmp = pattern.charAt(0)]) {
 					expr = "_." + ext[tmp] + "(" + expr + "," + quote(pattern.slice(tmp == "#" ? 0 : 1)) + ")"
 				} else {
 					for (; tmp = pattRe.exec(pattern); ) {
