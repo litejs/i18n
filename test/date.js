@@ -18,6 +18,7 @@ describe(".date()", function() {
 		i18n.use("et")
 		i18n.add("et", {
 			"@": {
+				"": "jaan veeb märts apr mai juuni juuli aug sept okt nov dets jaanuar veebruar märts aprill mai juuni juuli august september oktoober november detsember P E T K N R L pühapäev esmaspäev teisipäev kolmapäev neljapäev reede laupäev".split(" "),
 				am: "AM",
 				pm: "PM",
 				iso:   "UTC:y-MM-dd'T'HH:mm:ss'Z'",
@@ -42,7 +43,12 @@ describe(".date()", function() {
 		// yyyyy.MMMM.dd GGG hh:mm aaa	01996.July.10 AD 12:08 PM
 
 		assert
-		.equal( i18n.date(d2s, "h 'o''clock' a"), "1 o'clock AM" )
+		.equal( i18n.date(d1, "h 'o''clock' a"), "5 o'clock AM" )
+		.equal( i18n.date(d1, "M MM MMM MMMM"), "2 02 veeb veebruar" )
+		.equal( i18n.date(d1, "d dd ddd dddd"), "3 03 L laupäev" )
+		.equal( i18n.date(d2d, "u U"), "1234567890 1234567890123" )
+		.equal( i18n.date(d2d, "Q Z ZZ"), "1 +02:00 +0200" )
+		.equal( i18n.date(d2d, "SS"), "123" )
 
 
 		assert
@@ -51,6 +57,12 @@ describe(".date()", function() {
 		.equal( i18n.date(d2s), "2009-02-13T23:31:30Z" )
 		.equal( i18n.date(d2s, "LT"), "01:31" )
 		.equal( i18n("{at;@LT}", {at: d2s}), "01:31" )
+
+		assert.equal( i18n.date(d2s, "LT", 3), "02:31" )
+		Date._tz = 4
+		assert.equal( i18n.date(d2s, "HH:mm\n"), "03:31\n" )
+		Date._tz = void 0
+		assert.equal( i18n.date(NaN, "LT"), "Invalid Date" )
 
 		// should format ISO 8601 week numbers in local time
 		var key, map = {

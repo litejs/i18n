@@ -83,12 +83,8 @@
 			return Function("$,_,$g", args + ";return(" + fn + (
 				lastIndex < str.length ? ")+" + quote(str.slice(lastIndex)) : ")"
 			))
-		} catch (e) {
-			/*** debug
-			console.log("makeFn", str, args, fn)
-			console.log(e)
-			/**/
-		}
+		/* c8 ignore next */
+		} catch (e) {}
 		return str.replace(/{;/g, "{")
 	}
 
@@ -184,7 +180,7 @@
 			tmp1.setTime(d)
 			offset = utc ? 0 : -tmp1.getTimezoneOffset()
 		}
-		return isNaN(d) ? "" + d : (
+		return isNaN(d) ? "" + tmp1 : (
 			fns[mask] || (fns[mask] = Function("d,a,o,l", "var t;return \"" + dateStr(mask, utc) + "\"")))(
 			tmp1,
 			tmp2,
@@ -201,7 +197,7 @@
 			mask = (
 				esc            ? escape(esc).replace(/%u/g, "\\u").replace(/%/g, "\\x") :
 				text !== void 0 ? text.replace(/''/g, "'") :
-				MD             ? "l.names[" + get + (MD == "M" ? "Month" : "Day" ) + "()+" + (match == "ddd" ? 24 : MD == "d" ? 31 : match == "MMM" ? 0 : 12) + "]" :
+				MD             ? "l[''][" + get + (MD == "M" ? "Month" : "Day" ) + "()+" + (match == "ddd" ? 24 : MD == "d" ? 31 : match == "MMM" ? 0 : 12) + "]" :
 				match == "u"   ? "(d/1000)>>>0" :
 				match == "U"   ? "+d" :
 				match == "Q"   ? "((" + get + "Month()/3)|0)+1" :
