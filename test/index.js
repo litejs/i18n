@@ -82,8 +82,8 @@ describe("i18n", function() {
 
 		i18n.add("et", {
 			_: {
-				num: "#1;-",
-				num1: "#0,1;-"
+				and: "{$;map:'{$}',', ',', and '}",
+				temp: "{$;#1} C"
 			},
 			ordinal: '"."',
 			Home: "Ko'du",
@@ -111,8 +111,8 @@ describe("i18n", function() {
 		assert.equal(i18n(3), "3")
 		assert.equal(i18n("{;name}"), "{name}")
 		assert.equal(i18n("{'Name';}"), "Nimi")
-		assert.equal(i18n("{a;}", {a:"Name"}), "Nimi")
 		assert.equal(i18n("{a;}", {a:"nested",b:"X"}), "Nested X")
+		assert.equal(i18n("{a;_temp}", {a:12.3}), "12 C")
 		assert.equal(i18n("a.Name"), "Nimi A")
 		assert.equal(i18n("b.Name"), "Nimi")
 		assert.equal(i18n(["b.Name","a.Name"]), "Nimi")
@@ -121,7 +121,7 @@ describe("i18n", function() {
 		assert.equal(i18n("button.Home"), "Ko'du")
 		assert.equal(i18n("replace", {name:"Foo", age:10.1, deep:{map:"bar"}}), "Ni'mi FOO,\nBAR vanus 10 4")
 		assert.equal(i18n("list", {arr: [{name:"a",val:1},{name:"b",val:2}]}), "a;1, b;2")
-		assert.equal(i18n("{a;map:'{$}',', ',', and '}", {a: ["Key", "Foo", "Bar"]}), "Key, Foo, and Bar")
+		assert.equal(i18n("{a;_and}", {a: ["Key", "Foo", "Bar"]}), "Key, Foo, and Bar")
 		assert.equal(i18n("{a;map:'{$}',', ',', and '}", {a: {a:"Key", b:"Foo", c:"Bar"}}), "Key, Foo, and Bar")
 
 		assert.equal(i18n("{lo;upcase}", { lo: "loCase" }), "LOCASE")

@@ -329,6 +329,13 @@
 	}
 	/**/
 
+	/*** i18n.templates ***/
+	i18n[ext["_"] = "_"] = templates
+	function templates(data, key) {
+		return i18n("_." + key, data)
+	}
+	/**/
+
 	/*** i18n.pattern ***/
 	i18n[ext["~"] = "pattern"] = pattern
 	function pattern(str, re) {
