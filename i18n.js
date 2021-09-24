@@ -330,7 +330,7 @@
 	/**/
 
 	/*** i18n.templates ***/
-	i18n[ext["_"] = "_"] = templates
+	i18n[ext._ = "_"] = templates
 	function templates(data, key) {
 		return i18n("_." + key, data)
 	}

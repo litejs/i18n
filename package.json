@@ -1,6 +1,6 @@
 {
   "name": "@litejs/i18n",
-  "version": "21.0.0-rc.1",
+  "version": "21.9.0",
   "description": "Simple i18n",
   "license": "MIT",
   "author": "Lauri Rooden <lauri@rooden.ee>",
@@ -13,7 +13,17 @@
     "litejs"
   ],
   "main": "i18n.js",
-  "files": [
-  ],
-  "repository": "github:litejs/i18n"
+  "files": [],
+  "repository": "github:litejs/i18n",
+  "litejs": {
+    "build": false
+  },
+  "jshintConfig": {
+    "asi": true,
+    "boss": true,
+    "evil": true,
+    "laxcomma": true,
+    "maxdepth": 6,
+    "quotmark": "double"
+  }
 }
