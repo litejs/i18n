@@ -331,6 +331,18 @@
 	}
 	/**/
 
+	/*** i18n.pattern ***/
+	i18n[ext["~"] = "pattern"] = pattern
+	function pattern(str, re) {
+		var values = []
+		, key = str.replace(RegExp(re || getStr("~", "", "[\\d.]+"), "g"), function(a) {
+			values.push(a)
+			return "#"
+		})
+		return str != key && getStr("~", key).replace(/#/g, values.shift.bind(values)) || str
+	}
+	/**/
+
 	/*** i18n.pick ***/
 	var pickRe1 = /([^;=,]+?)\?/g
 	, pickRe2 = /[;=,]/

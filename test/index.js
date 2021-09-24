@@ -151,6 +151,7 @@ describe("i18n", function() {
 
 	require("./date.js")
 	require("./number.js")
+	require("./pattern.js")
 	require("./pick.js")
 	require("./plural.js")
 })
